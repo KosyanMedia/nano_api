@@ -4,7 +4,7 @@ require 'digest/md5'
 
 module NanoApi
   class Client
-    AFFILIATE_MARKER_PATTERN = /\A\d{5}/
+    AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
     MAPPING = {:'zh-CN' => :cn}
 
     include NanoApi::Client::Search
@@ -14,6 +14,7 @@ module NanoApi
     include NanoApi::Client::Airlines
     include NanoApi::Client::UiEvents
     include NanoApi::Client::Overmind
+    include NanoApi::Client::Affiliate
 
     attr_reader :controller
     delegate :request, :session, :marker, to: :controller, allow_nil: true
@@ -33,6 +34,10 @@ module NanoApi
 
     def self.affiliate_marker? marker
       !!(marker.to_s =~ AFFILIATE_MARKER_PATTERN)
+    end
+
+    def self.extract_marker marker
+      marker.try(:gsub, AFFILIATE_MARKER_PATTERN).try(:first)
     end
 
     def self.signature marker, *params

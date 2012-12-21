@@ -1,4 +1,5 @@
 class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
+  helper_method :show_hotels?
 
   def new
     @search = search_instance search_params
@@ -32,4 +33,13 @@ private
     params[:search].is_a?(Hash) ? params[:search] : params
   end
 
+  def show_hotels?
+    (affiliate.is_a?(Hash) && affiliate.has_key?(:show_hotels)) ? affiliate[:show_hotels] : true
+  end
+
+  def affiliate
+    return @affiliate if instance_variable_defined?(:@affiliate)
+
+    @affiliate = NanoApi::Client.new(self).affiliate.try(:symbolize_keys)
+  end
 end

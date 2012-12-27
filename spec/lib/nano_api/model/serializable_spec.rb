@@ -64,6 +64,10 @@ describe NanoApi::Model::Serializable do
     specify{subject.tap{|s| s.date = '2012-09-15'}.date.to_s.should == '2012-09-15'}
     specify{subject.tap{|s| s.date = '2012/09/15'}.date.to_s.should == '2012-09-15'}
     specify{subject.tap{|s| s.date = '15 September 2012'}.date.to_s.should == '2012-09-15'}
+    specify{subject.tap{|s| s.date = '15 Сентября 2012'}.date.to_s.should == '2012-09-15'}
+    specify{subject.tap{|s| s.date = '15 Сен 2012'}.date.to_s.should == '2012-09-15'}
+    specify{subject.tap{|s| s.date = '15 März 2012'}.date.to_s.should == '2012-03-15'}
+    specify{subject.tap{|s| s.date = '15 Mai 2012'}.date.to_s.should == '2012-05-15'}
   end
 
 end

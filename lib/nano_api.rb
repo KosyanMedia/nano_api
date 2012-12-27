@@ -1,3 +1,4 @@
+require 'active_support'
 require 'rest_client'
 require 'nano_api/version'
 require 'nano_api/engine' if defined? Rails
@@ -14,7 +15,7 @@ module NanoApi
   extend NanoApi::Global
 
   module Backends
-    extend ActiveSupport::Autoload
+    extend ::ActiveSupport::Autoload
 
     autoload_under 'controllers' do
       autoload :SearchesController

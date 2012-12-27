@@ -34,7 +34,13 @@ private
   end
 
   def show_hotels?
+    return false if hide_hotels_by_params?
+
     (affiliate.is_a?(Hash) && affiliate.has_key?(:show_hotels)) ? affiliate[:show_hotels] : true
+  end
+
+  def hide_hotels_by_params?
+    'false' == params[:show_hotels]
   end
 
   def affiliate

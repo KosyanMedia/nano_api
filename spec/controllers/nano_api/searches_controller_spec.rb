@@ -142,8 +142,11 @@ describe NanoApi::SearchesController do
   end
 
   describe 'show_hotels?' do
+    let(:params){{}}
+
     before do
       controller.stub(:affiliate).and_return(affiliate)
+      controller.stub(:params).and_return(params)
     end
 
     context 'affiliate is nil' do
@@ -164,6 +167,24 @@ describe NanoApi::SearchesController do
     context 'affiliate show_hotels is false' do
       let(:affiliate){{:show_hotels => false}}
       specify{controller.send(:show_hotels?).should be_false}
+    end
+
+    context 'affiliate show_hotels is false, parameter show_hotels is true' do
+      let(:affiliate){{:show_hotels => false}}
+      let(:params){{:show_hotels => 'true'}}
+      specify{controller.send(:show_hotels?).should be_false}
+    end
+
+    context 'affiliate show_hotels is true, parameter show_hotels is false' do
+      let(:affiliate){{:show_hotels => true}}
+      let(:params){{:show_hotels => 'false'}}
+      specify{controller.send(:show_hotels?).should be_false}
+    end
+
+    context 'affiliate show_hotels is true, parameter show_hotels is 0' do
+      let(:affiliate){{:show_hotels => true}}
+      let(:params){{:show_hotels => '0'}}
+      specify{controller.send(:show_hotels?).should be_true}
     end
   end
 end

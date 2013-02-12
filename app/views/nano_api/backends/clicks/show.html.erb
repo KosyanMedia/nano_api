@@ -2,6 +2,7 @@
   <script type="text/javascript">
     window.location.href = '<%= raw @click_params[:url] %>';
   </script>
+  <%= render 'counter' %>
 <% else %>
   <%= render 'form', form: @click_params %>
 

@@ -8,6 +8,7 @@ gem 'timeliness', github: 'arr-ee/timeliness', branch: 'localized_components'
 group :test do
   gem 'guard'
   gem 'guard-rspec'
+  gem 'timecop'
   gem 'rb-inotify', :require => false
   gem 'rb-fsevent', :require => false
   gem 'rb-fchange', :require => false

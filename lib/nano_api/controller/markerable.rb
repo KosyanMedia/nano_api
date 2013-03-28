@@ -17,12 +17,13 @@ module NanoApi
 
       def handle_marker
         marker = params[:marker].presence || params[:ref].presence
-
         if marker && _new_marker?(marker) && (_affiliate_marker?(marker) || !_affiliate_marker?(cookies[:marker]))
+          @marker = marker
+
           cookies[:marker] = {
             :value => marker,
             :domain => (request.domain if request.domain.include?('.')),
-            :expires => 30.days.from_now
+            :expires => affiliate_attribute(:marker_life_time_in_days, 30).days.from_now
           }
         end
       end
@@ -43,6 +44,16 @@ module NanoApi
 
       def _affiliate_marker?(marker)
         NanoApi::Client.affiliate_marker?(marker)
+      end
+
+      def affiliate
+        return @affiliate if instance_variable_defined?(:@affiliate)
+
+        @affiliate = NanoApi::Client.new(self).affiliate.try(:symbolize_keys)
+      end
+
+      def affiliate_attribute name, default
+        (affiliate.is_a?(Hash) && affiliate.has_key?(name)) ? affiliate[name] : default
       end
 
     end

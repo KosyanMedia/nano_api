@@ -12,6 +12,11 @@ describe NanoApi::Controller::Markerable do
       end
     end
 
+    let(:affiliate_attributes){{}}
+    before do
+      controller.stub(affiliate: affiliate_attributes)
+    end
+
     describe '.marker' do
       [ {:marker => 'referer'}, {:ref => 'referer'} ].each do |param|
         specify do
@@ -31,32 +36,36 @@ describe NanoApi::Controller::Markerable do
       end
     end
 
-    it 'should update cookies if new marker is affiliate marker' do
-      get :new, :marker => 'test'
-      get :new, :marker => '12345'
+    context 'new marker is affiliate marker' do
+      it 'should update cookies' do
+        get :new, :marker => 'test'
+        get :new, :marker => '12345'
 
-      controller.send(:cookies)[:marker].should == '12345'
+        controller.send(:cookies)[:marker].should == '12345'
+      end
+
+      it 'should update affiliate cookies' do
+        get :new, :marker => '12346'
+        get :new, :marker => '12345'
+
+        controller.send(:cookies)[:marker].should == '12345'
+      end
     end
 
-    it 'should update affiliate cookies if new marker is affiliate marker' do
-      get :new, :marker => '12346'
-      get :new, :marker => '12345'
+    context 'new marker is not affiliate marker' do
+      it 'should update cookies' do
+        get :new, :marker => 'test'
+        get :new, :marker => 'test1'
 
-      controller.send(:cookies)[:marker].should == '12345'
-    end
+        controller.send(:cookies)[:marker].should == 'test1'
+      end
 
-    it 'should update cookies if new marker is not affiliate marker' do
-      get :new, :marker => 'test'
-      get :new, :marker => 'test1'
+      it 'should not update affiliate cookies' do
+        get :new, :marker => '12345'
+        get :new, :marker => 'test1'
 
-      controller.send(:cookies)[:marker].should == 'test1'
-    end
-
-    it 'should not update affiliate cookies if new marker is not affiliate marker' do
-      get :new, :marker => '12345'
-      get :new, :marker => 'test1'
-
-      controller.send(:cookies)[:marker].should == '12345'
+        controller.send(:cookies)[:marker].should == '12345'
+      end
     end
 
     it 'should not update cookie expired time for same affiliate requests' do
@@ -64,6 +73,32 @@ describe NanoApi::Controller::Markerable do
 
       controller.send(:cookies).should_not_receive(:[]=).with(:marker, an_instance_of(Hash))
       get :new, :marker => '12345'
+    end
+
+
+    shared_examples_for :marker_cookie_setter do
+      before(:all){Timecop.freeze}
+      after(:all){Timecop.return}
+      let(:marker){'test'}
+
+      it 'should set cookie with correct cookie params' do
+        controller.send(:cookies).should_receive(:[]=).with(:marker, cookie_params)
+        get :new, :marker => marker
+      end
+    end
+
+    context 'non affiliate marker' do
+      let(:affiliate_attributes){nil}
+      let(:cookie_params){{value: marker, domain: 'test.host', expires: 30.days.from_now}}
+
+      it_should_behave_like :marker_cookie_setter
+    end
+
+    context 'affiliate marker with custom marker life time' do
+      let(:affiliate_attributes){{marker_life_time_in_days: 1}}
+      let(:cookie_params){{value: marker, domain: 'test.host', expires: 1.day.from_now}}
+
+      it_should_behave_like :marker_cookie_setter
     end
   end
 end

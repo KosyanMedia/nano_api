@@ -12,10 +12,10 @@ module NanoApi::Client::Affiliate
     RestClient::BadRequest,
     RestClient::Forbidden,
     RestClient::ServiceUnavailable,
-    RestClient::MethodNotAllowed => exception
-      [exception.http_body, exception.http_code]
-  rescue RestClient::InternalServerError, JSON::ParserError
-    nil
+    RestClient::MethodNotAllowed,
+    RestClient::InternalServerError,
+    JSON::ParserError
+      nil
   end
 
   def affilate_signature affiliate_marker

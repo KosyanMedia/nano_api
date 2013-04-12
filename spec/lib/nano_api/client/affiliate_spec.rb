@@ -5,13 +5,15 @@ describe NanoApi::Client do
     let(:marker){'11501.lo'}
     let(:clean_marker){'11501'}
     let(:signature){'test_signature'}
+    let(:status){['200', 'Ok']}
     before do
       subject.stub(:affilate_signature).and_return(signature)
       subject.stub(:marker).and_return(marker);
       FakeWeb.register_uri(
         :get,
         NanoApi.config.search_server + '/affiliates/%d.json?locale=en&signature=%s' % [clean_marker, signature],
-        body: response_body
+        body: response_body,
+        status: status
       )
     end
 
@@ -42,13 +44,22 @@ describe NanoApi::Client do
       end
     end
 
-    context 'handle api errors' do
+    context 'handle empty response' do
       let(:response_body){'{}'}
 
       it 'should return nil' do
         subject.affiliate.should be_nil
       end
     end
+
+     context 'handle forbidden' do
+        let(:response_body){'{error: "your ip is banned"}'}
+        let(:status){['403', 'Forbidden']}
+
+        it 'should return nil' do
+          subject.affiliate.should be_nil
+        end
+      end
 
   end
 end

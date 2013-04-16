@@ -6,6 +6,7 @@ require 'digest/md5'
 module NanoApi
   module Client
     AFFILIATE_MARKER_PATTERN = /\A\d{5}/
+    MAPPING = {:'zh-CN' => :cn}
 
     class << self
       include Client::Search
@@ -38,7 +39,7 @@ module NanoApi
 
       def request method, path, params = {}, options = {}
         options.reverse_merge!(parse: true)
-        params = params.reverse_merge(locale: I18n.locale)
+        params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
         path += '.json'
 
         if method == :get

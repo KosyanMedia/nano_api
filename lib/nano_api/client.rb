@@ -3,9 +3,9 @@ require 'json'
 require 'digest/md5'
 
 module NanoApi
-  class Client
+  module Client
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
-    MAPPING = {:'zh-CN' => :cn}
+    MAPPING = { :'zh-CN' => :cn, :'en-GB' => :'en_GB', :'en-AU' => :en }
 
     include NanoApi::Client::Search
     include NanoApi::Client::Click

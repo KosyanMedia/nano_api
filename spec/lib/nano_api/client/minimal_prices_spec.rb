@@ -4,10 +4,10 @@ describe NanoApi::Client do
   let(:rest_client){subject.send(:site)}
   let(:fake){ %r{^#{URI.join(NanoApi.config.search_server, path)}} }
 
-  describe '.minimal_prices' do
+  describe 'minimal prices matrices' do
     let(:search){1212}
 
-    context 'week' do
+    describe '#week_minimal_prices' do
       let(:direct_date){'date'}
       let(:return_date){'date_1'}
       let(:params){{
@@ -25,7 +25,7 @@ describe NanoApi::Client do
       end
     end
 
-    context 'month' do
+    describe '#month_minimal_prices' do
       let(:month){'month'}
       let(:params){{
         search_id: search,
@@ -41,7 +41,7 @@ describe NanoApi::Client do
       end
     end
 
-    context 'nearest' do
+    describe '#nearest_cities_prices' do
       let(:params){{
         search_id: search
       }}
@@ -53,6 +53,48 @@ describe NanoApi::Client do
       it 'should return json received from api call' do
         subject.nearest_cities_prices(search).should == '[price_1, price_2]'
       end
+    end
+  end
+
+  describe '#latest_prices' do
+    let(:path){'latest_prices.json'}
+    let(:params){{
+      origin: 'MOW',
+      origin_iata: 'MOW',
+      destination: 'TH',
+      destination_iata: '',
+      beginning_of_period: '2013-05-01',
+      period_type: 'Month',
+      one_way: false,
+      trip_duration: 3,
+      sorting: 'price',
+      page: 1,
+      currency: 'rub'
+    }}
+
+    let(:controller) do
+      mock(marker: '12345', session: {}, request: mock(host: 'test.com', env: {}, remote_ip: '127.1.1.1'))
+    end
+
+    subject { NanoApi::Client.new controller }
+
+    it 'should pass correct params' do
+      api_call_params = params.merge(show_to_affiliates: true, per_page: NanoApi::Client::LATEST_PRICES_PER_PAGE)
+      subject.should_receive(:get).with('latest_prices', api_call_params)
+
+      subject.latest_prices(params)
+    end
+
+    it 'should return json received from api call' do
+      FakeWeb.register_uri :get, fake, body: '{"prices": [1, 2, 3]}'
+
+      subject.latest_prices(params).should == {prices: [1, 2, 3]}
+    end
+
+    it 'allows override show_to_affiliates and per_page params' do
+      subject.should_receive(:get).with('latest_prices', hash_including(show_to_affiliates: false, per_page: 20))
+
+      subject.latest_prices(params.merge(show_to_affiliates: false, per_page: 20))
     end
   end
 end

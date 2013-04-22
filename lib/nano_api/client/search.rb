@@ -1,5 +1,4 @@
 module NanoApi::Client::Search
-
   SEARCH_PARAMS_KEYS = %w[
     origin_iata origin_name destination_iata destination_name
     depart_date return_date
@@ -58,5 +57,4 @@ private
     result.unshift(NanoApi.config.marker) if NanoApi.config.marker.present?
     result.compact.join(?.)
   end
-
 end

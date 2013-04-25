@@ -27,6 +27,7 @@ module NanoApi
     def affilate?
       self.class.affiliate_marker? marker
     end
+    alias affiliate? affilate?
 
     def self.site
       @site ||= RestClient::Resource.new(NanoApi.config.search_server)

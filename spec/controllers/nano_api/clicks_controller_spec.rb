@@ -6,7 +6,7 @@ describe NanoApi::ClicksController do
   describe 'GET new' do
     context do
       it 'should render from with params, received from api' do
-        NanoApi::Client.any_instance.should_receive(:click).with('111', '123', hash_including(:unique => '1')).and_return(
+        NanoApi::Client.any_instance.should_receive(:click).with('111', '123', hash_including(unique: '1')).and_return(
           url: 'http://test.com',
           http_method: 'post',
           params: {test: 'test_value'}
@@ -16,8 +16,8 @@ describe NanoApi::ClicksController do
         response.should be_success
         response.body
         response.should render_template(:show)
-        expect(response.body).to have_selector('form[method=post][action="http://test.com"]')
-        expect(response.body).to have_selector('input[type=hidden][name=test][value=test_value]')
+        response.body.should have_selector('form[method=post][action="http://test.com"]')
+        response.body.should have_selector('input[type=hidden][name=test][value=test_value]')
       end
     end
 
@@ -28,7 +28,7 @@ describe NanoApi::ClicksController do
       end
 
       it 'should be non-uniq click after first' do
-        NanoApi::Client.any_instance.should_receive(:click).with('111', '123', hash_not_including(:unique => '1'))
+        NanoApi::Client.any_instance.should_receive(:click).with('111', '123', hash_not_including(unique: '1'))
         get :show, use_route: :nano_api, search_id: 111, id: 123
       end
     end

@@ -1,6 +1,23 @@
 require 'spec_helper'
 
 describe 'Routes' do
+  before do
+    @routes = NanoApi::Engine.routes
+  end
+
+  context 'Minimal prices routes' do
+    it 'should route latest prices with post method' do
+      post('/latest_prices').should route_to('nano_api/minimal_prices#latest_prices')
+    end
+
+    it 'should route latest prices' do
+      get('/latest_prices').should route_to('nano_api/minimal_prices#latest_prices')
+    end
+
+    it 'should route week minimal prices'
+    it 'should route month minimal prices'
+  end
+
   context 'Searches routes' do
     it 'should route new search'
     it 'should route search creation'
@@ -12,11 +29,6 @@ describe 'Routes' do
 
   context 'Auto complete routes' do
     it 'should route auto complete'
-  end
-
-  context 'Minimal prices routes' do
-    it 'should route week minimal prices'
-    it 'should route month minimal prices'
   end
 
   context 'GateMeta routes' do

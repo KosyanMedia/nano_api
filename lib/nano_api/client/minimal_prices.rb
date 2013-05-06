@@ -17,8 +17,8 @@ module NanoApi::Client::MinimalPrices
 
   def latest_prices params
     latest_prices_params = params.slice(
-      :origin, :destination, :origin_iata, :destination_iata, :beginning_of_period, :period_type,
-      :trip_duration, :sorting, :one_way, :page, :currency, :show_to_affiliates, :per_page
+      :origin, :destination, :origin_iata, :destination_iata, :period,
+      :trip_duration, :sorting, :one_way, :page, :currency, :show_to_affiliates, :period, :per_page
     ).reverse_merge(show_to_affiliates: affiliate?, per_page: LATEST_PRICES_PER_PAGE)
 
     get('latest_prices', latest_prices_params).try(:symbolize_keys)

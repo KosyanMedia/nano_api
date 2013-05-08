@@ -3,6 +3,7 @@ module NanoApi
     include NanoApi::Model
 
     attribute :email
+    attribute :marker
     attribute :frozen_until, type: Date
 
     embeds_many :fare_alerts, :class_name => 'NanoApi::FareAlert'

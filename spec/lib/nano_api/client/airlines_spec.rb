@@ -7,7 +7,7 @@ describe NanoApi::Client do
   let(:path){'airlines_for_direction.json'}
 
   before do
-    FakeWeb.register_uri :get, fake, body: response
+    stub_http_request(:get, fake).to_return(body: response)
   end
 
   it 'should return list of airlines for requested direction' do

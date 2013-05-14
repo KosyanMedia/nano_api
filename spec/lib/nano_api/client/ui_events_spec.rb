@@ -7,7 +7,7 @@ describe NanoApi::Client do
   let(:path){'/ui_events/mass_create.json'}
 
   before do
-    FakeWeb.register_uri :post, fake, body: response
+    stub_http_request(:post, fake.to_s).to_return(body: response)
   end
 
   it 'should return list of airlines for requested direction' do

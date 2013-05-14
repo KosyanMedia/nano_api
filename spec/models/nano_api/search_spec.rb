@@ -74,17 +74,21 @@ describe NanoApi::Search do
   end
 
   describe 'names defaults' do
-    let(:search) { Fabricate :nano_api_search_iatas }
+    let(:origin_iata){'MOW'}
+    let(:destination_iata){'LON'}
+    let(:search) { Fabricate :nano_api_search_iatas, origin_iata: origin_iata, destination_iata: destination_iata }
 
     context do
       before do
-        FakeWeb.register_uri(:get,
-          NanoApi.config.data_server + "/api/places?code=#{search.destination_iata}&locale=#{I18n.locale}",
-          body: "[{\"_type\": \"City\", \"code\": \"#{search.destination_iata}\", \"name\": \"London1\"}]"
+        stub_http_request(
+          :get,
+          NanoApi.config.data_server + "/api/places?code=#{destination_iata}&locale=#{I18n.locale}"
+        ).to_return(
+          body: "[{\"_type\": \"City\", \"code\": \"#{destination_iata}\", \"name\": \"London1\"}]"
         )
       end
 
-      its(:origin_name){ should == search.origin_iata }
+      its(:origin_name){ should == origin_iata }
       its(:destination_name){ should == 'London1' }
     end
   end

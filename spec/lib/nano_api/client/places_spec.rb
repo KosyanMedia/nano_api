@@ -10,7 +10,7 @@ describe NanoApi::Client do
     context 'standard api call' do
       before do
         I18n.locale = :ru
-        FakeWeb.register_uri(:get, fake, body: '[place1, place2]')
+        stub_http_request(:get, fake).to_return(body: '[place1, place2]')
       end
 
       it 'should return parsed json' do
@@ -20,7 +20,7 @@ describe NanoApi::Client do
 
     context 'handle api errors' do
       before do
-        FakeWeb.register_uri(:get, fake, status: ['400', 'Bad Request'])
+        stub_http_request(:get, fake).to_return(status: [400, 'Bad Request'])
       end
 
       it 'should return parsed json' do
@@ -48,8 +48,7 @@ describe NanoApi::Client do
 
     before do
       I18n.locale = :en
-      FakeWeb.register_uri(:get, fake, body: places.to_json
-      )
+      stub_http_request(:get, fake).to_return(body: places.to_json)
     end
 
     it 'should return estimated duration in seconds, from api call' do

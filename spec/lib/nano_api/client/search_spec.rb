@@ -13,7 +13,7 @@ describe NanoApi::Client do
 
     context 'normal response' do
       before do
-        FakeWeb.register_uri :post, fake, body: '{tickets: [{test: 1}, {test: 2]}'
+        stub_http_request(:post, fake).to_return(body: '{tickets: [{test: 1}, {test: 2]}')
       end
 
       it 'should require api for search action with given params' do
@@ -41,26 +41,22 @@ describe NanoApi::Client do
 
     context 'handle api errors' do
       it 'should handle invalid input error' do
-        FakeWeb.register_uri :post, fake,
-          body: '{error: "params is invalid"}',
-          status: ['400', 'Bad Request']
+        stub_http_request(:post, fake).
+          to_return(body: '{error: "params is invalid"}', status: [400, 'Bad Request'])
 
         subject.search({}).should == ['{error: "params is invalid"}', 400]
       end
 
       it 'should handle invalid input error' do
-        FakeWeb.register_uri(:post, NanoApi.config.search_server + '/searches.json',
-          body: '{error: "your ip is banned"}',
-          status: ['403', 'Forbidden']
-        )
+        stub_http_request(:post, NanoApi.config.search_server + '/searches.json').
+          to_return(body: '{error: "your ip is banned"}', status: [403, 'Forbidden'])
 
         subject.search({}).should == ['{error: "your ip is banned"}', 403]
       end
 
       it 'should handle invalid input error' do
-        FakeWeb.register_uri(:post, NanoApi.config.search_server + '/searches.json',
-          status: ['500', 'Internal Server Error']
-        )
+        stub_http_request(:post, NanoApi.config.search_server + '/searches.json').
+          to_return(status: [500, 'Internal Server Error'])
 
         subject.search({}).should == nil
       end
@@ -71,7 +67,7 @@ describe NanoApi::Client do
     let(:path){'searches/984657.json'}
 
     before do
-      FakeWeb.register_uri :get, fake, body: '{"origin": "MOW"}'
+      stub_http_request(:get, fake).to_return(body: '{"origin": "MOW"}')
     end
 
     it 'should return params of search with given id, returned from api' do
@@ -83,7 +79,7 @@ describe NanoApi::Client do
     let(:path){'estimated_search_duration.json'}
 
     before do
-      FakeWeb.register_uri :get, fake, body: '{"estimated_search_duration": 23}'
+      stub_http_request(:get, fake).to_return(body: '{"estimated_search_duration": 23}')
     end
 
     it 'should return estimated duration in seconds, from api call' do

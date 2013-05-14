@@ -16,9 +16,9 @@ Rails.backtrace_cleaner.remove_silencers!
 
 require 'capybara/rspec'
 
-# Setup FakeWeb
-require 'fakeweb'
-FakeWeb.allow_net_connect = false
+# Setup WebMock
+require 'webmock/rspec'
+WebMock.disable_net_connect!(:allow_localhost => true)
 
 # Run any available migration
 ActiveRecord::Migrator.migrate File.expand_path('../dummy/db/migrate/', __FILE__)

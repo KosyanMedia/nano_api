@@ -8,10 +8,11 @@ describe NanoApi::Client do
     let(:status){['200', 'Ok']}
     before do
       subject.stub(:affilate_signature).and_return(signature)
-      subject.stub(:marker).and_return(marker);
-      FakeWeb.register_uri(
+      subject.stub(:marker).and_return(marker)
+      stub_http_request(
         :get,
-        NanoApi.config.search_server + '/affiliates/%d.json?locale=en&signature=%s' % [clean_marker, signature],
+        NanoApi.config.search_server + '/affiliates/%d.json?locale=en&signature=%s' % [clean_marker, signature]
+      ).to_return(
         body: response_body,
         status: status
       )

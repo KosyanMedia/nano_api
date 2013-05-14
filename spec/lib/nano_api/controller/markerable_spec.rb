@@ -36,6 +36,23 @@ describe NanoApi::Controller::Markerable do
       end
     end
 
+    context 'marker is NOT given in request params' do
+      describe 'should save default marker to cookies when marker in cookies is blank' do
+        specify do
+          get :new
+          controller.send(:cookies)[:marker].should == 'direct'
+        end
+      end
+
+      describe 'should NOT save default marker to cookies when marker in cookies is NOT blank' do
+        specify do
+          get :new, marker: 'test'
+          get :new
+          controller.send(:cookies)[:marker].should_not == 'direct'
+        end
+      end
+    end
+
     context 'new marker is affiliate marker' do
       it 'should update cookies' do
         get :new, :marker => 'test'

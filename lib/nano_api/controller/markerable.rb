@@ -18,14 +18,24 @@ module NanoApi
       def handle_marker
         marker = params[:marker].presence || params[:ref].presence
         if marker && _new_marker?(marker) && (_affiliate_marker?(marker) || !_affiliate_marker?(cookies[:marker]))
-          @marker = marker
+          set_marker(marker)
+        elsif cookies[:marker].blank?
+          set_marker(default_marker)
+        end
+      end
 
-          cookies[:marker] = {
+      def set_marker(marker)
+        @marker = marker
+
+        cookies[:marker] = {
             :value => marker,
             :domain => (request.domain if request.domain.include?('.')),
             :expires => affiliate_attribute(:marker_life_time_in_days, 30).days.from_now
-          }
-        end
+        }
+      end
+
+      def default_marker
+        'direct'
       end
 
       def redirect_marker

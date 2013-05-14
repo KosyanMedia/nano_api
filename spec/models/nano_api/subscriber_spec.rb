@@ -6,7 +6,7 @@ describe NanoApi::Subscriber do
     let(:subscriber){ Fabricate :nano_api_subscriber }
     let(:fake) { %r{^#{URI.join(NanoApi.config.search_server, 'subscribers')}} }
 
-    before { FakeWeb.register_uri :post, fake, status: ["200", "OK"] }
+    before { stub_http_request(:post, fake).to_return(status: [200, 'OK']) }
 
     context do
       specify do

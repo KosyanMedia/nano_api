@@ -8,10 +8,10 @@ describe NanoApi::Client do
   describe '#place' do
     context 'success' do
       before do
-        FakeWeb.register_uri(:get,
-          NanoApi.config.data_server + "/api/places?code=#{iata}&locale=#{locale}",
-          body: result
-        )
+        stub_http_request(
+          :get,
+          NanoApi.config.data_server + "/api/places?code=#{iata}&locale=#{locale}"
+        ).to_return(body: result)
       end
 
       it 'should return result json' do
@@ -21,10 +21,10 @@ describe NanoApi::Client do
 
     context 'fail' do
       before do
-        FakeWeb.register_uri(:get,
-          NanoApi.config.data_server + "/api/places?code=#{iata}&locale=#{locale}",
-          status: ['404', 'Not Found']
-        )
+        stub_http_request(
+          :get,
+          NanoApi.config.data_server + "/api/places?code=#{iata}&locale=#{locale}"
+        ).to_return(status: [404, 'Not Found'])
       end
 
       it 'should return empty array' do

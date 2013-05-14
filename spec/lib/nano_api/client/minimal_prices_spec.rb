@@ -17,7 +17,7 @@ describe NanoApi::Client do
       }}
       let(:path){'minimal_prices.json'}
       before do
-        FakeWeb.register_uri :get, fake, body: '{date_1: {date2: price}}'
+        stub_http_request(:get, fake).to_return(body: '{date_1: {date2: price}}')
       end
 
       it 'should return json received from api call' do
@@ -33,7 +33,7 @@ describe NanoApi::Client do
       }}
       let(:path){'month_minimal_prices.json'}
       before do
-        FakeWeb.register_uri :get, fake, body: '[price_1, price_2]'
+        stub_http_request(:get, fake).to_return(body: '[price_1, price_2]')
       end
 
       it 'should return json received from api call' do
@@ -47,7 +47,7 @@ describe NanoApi::Client do
       }}
       let(:path){'nearest_cities_prices.json'}
       before do
-        FakeWeb.register_uri :get, fake, body: '[price_1, price_2]'
+        stub_http_request(:get, fake).to_return(body: '[price_1, price_2]')
       end
 
       it 'should return json received from api call' do
@@ -85,7 +85,7 @@ describe NanoApi::Client do
     end
 
     it 'should return json received from api call' do
-      FakeWeb.register_uri :get, fake, body: '{"prices": [1, 2, 3]}'
+      stub_http_request(:get, fake).to_return(body: '{"prices": [1, 2, 3]}')
 
       subject.latest_prices(params).should == {prices: [1, 2, 3]}
     end

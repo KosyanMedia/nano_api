@@ -8,7 +8,7 @@ describe NanoApi::Feedback do
 
     context 'success' do
       before do
-        FakeWeb.register_uri :post, fake, status: ["200", "OK"]
+        stub_http_request(:post, fake).to_return(status: [200, 'OK'])
       end
 
       specify { feedback.save.should be_true }
@@ -16,7 +16,7 @@ describe NanoApi::Feedback do
 
     context 'fail' do
       before do
-        FakeWeb.register_uri :post, fake, status: ["422", "Unprocessible Entry"]
+        stub_http_request(:post, fake).to_return(status: [422, 'Unprocessible Entry'])
       end
 
       specify { feedback.save.should be_false }

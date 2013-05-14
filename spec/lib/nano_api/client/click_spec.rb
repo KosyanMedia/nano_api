@@ -7,7 +7,10 @@ describe NanoApi::Client do
 
     context 'standard api call' do
       before do
-        FakeWeb.register_uri(:post, NanoApi.config.search_server + '/searches/%d/order_urls/%d.json' % [search, url],
+        stub_http_request(
+          :post,
+          NanoApi.config.search_server + '/searches/%d/order_urls/%d.json' % [search, url]
+        ).to_return(
           body: '{"url": "http://test.com", "http_method": "post", "params": {"test_key": "test_value"}}'
         )
       end
@@ -23,10 +26,10 @@ describe NanoApi::Client do
 
     context 'handle api errors' do
       before do
-        FakeWeb.register_uri(:post,
-          NanoApi.config.search_server + '/searches/%d/order_urls/%d.json' % [search, url],
-          status: ['404', 'Not Found']
-        )
+        stub_http_request(
+          :post,
+          NanoApi.config.search_server + '/searches/%d/order_urls/%d.json' % [search, url]
+        ).to_return(status: [404, 'Not Found'])
       end
 
       it 'should return parsed json' do
@@ -40,10 +43,10 @@ describe NanoApi::Client do
     let(:airline){'3425klnk5b13k5b23h5s'}
 
     before do
-      FakeWeb.register_uri(:get,
-        NanoApi.config.search_server + "/airline_logo/#{airline}.json?locale=en&search_id=#{search}",
-        body: '{"url": "http://test.com"}'
-      )
+      stub_http_request(
+        :get,
+        NanoApi.config.search_server + "/airline_logo/#{airline}.json?locale=en&search_id=#{search}"
+      ).to_return(body: '{"url": "http://test.com"}')
     end
 
     it 'should return parsed json' do
@@ -58,10 +61,10 @@ describe NanoApi::Client do
     let(:proposal){232}
 
     before do
-      FakeWeb.register_uri(:get,
-        NanoApi.config.search_server + "/airline_deeplinks/#{proposal}.json?adults=1&locale=en&search_id=#{search}",
-        body: '{"url": "http://test.com", "http_method": "post"}'
-      )
+      stub_http_request(
+        :get,
+        NanoApi.config.search_server + "/airline_deeplinks/#{proposal}.json?adults=1&locale=en&search_id=#{search}"
+      ).to_return(body: '{"url": "http://test.com", "http_method": "post"}')
     end
 
     it 'should return parsed json' do

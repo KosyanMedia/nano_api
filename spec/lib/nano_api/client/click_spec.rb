@@ -45,7 +45,7 @@ describe NanoApi::Client do
     before do
       stub_http_request(
         :get,
-        NanoApi.config.search_server + "/airline_logo/#{airline}.json?locale=en&search_id=#{search}"
+        NanoApi.config.search_server + "/airline_logo/#{airline}.json?locale=en&marker=&search_id=#{search}"
       ).to_return(body: '{"url": "http://test.com"}')
     end
 
@@ -63,7 +63,7 @@ describe NanoApi::Client do
     before do
       stub_http_request(
         :get,
-        NanoApi.config.search_server + "/airline_deeplinks/#{proposal}.json?adults=1&locale=en&search_id=#{search}"
+        NanoApi.config.search_server + "/airline_deeplinks/#{proposal}.json?adults=1&locale=en&marker=&search_id=#{search}"
       ).to_return(body: '{"url": "http://test.com", "http_method": "post"}')
     end
 

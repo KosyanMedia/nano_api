@@ -29,9 +29,13 @@ module NanoApi
 
         cookies[:marker] = {
             :value => marker,
-            :domain => (request.domain if request.domain.include?('.')),
+            :domain => default_nano_domain,
             :expires => affiliate_attribute(:marker_life_time_in_days, 30).days.from_now
         }
+      end
+
+      def default_nano_domain
+        request.domain unless request.local?
       end
 
       def default_marker

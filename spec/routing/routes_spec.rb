@@ -1,9 +1,7 @@
 require 'spec_helper'
 
 describe 'Routes' do
-  before do
-    @routes = NanoApi::Engine.routes
-  end
+  routes { NanoApi::Engine.routes }
 
   context 'Minimal prices routes' do
     it 'should route latest prices with post method' do

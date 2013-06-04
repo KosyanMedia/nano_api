@@ -1,5 +1,6 @@
 class NanoApi::Backends::ClicksController < NanoApi::ApplicationController
   respond_to :html, :js
+  before_filter :track_click
 
   def show
     if @click_params = click_params
@@ -26,6 +27,13 @@ class NanoApi::Backends::ClicksController < NanoApi::ApplicationController
   end
 
 private
+
+  def track_click
+    track_id = cookies[:astrackid]
+    url = request.original_url
+
+    NanoApi.client.track_click(track_id, url) if track_id
+  end
 
   def click_params
     NanoApi.client.click(params[:search_id], params[:id],

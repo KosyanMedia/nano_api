@@ -9,6 +9,10 @@ module NanoApi
       Thread.current[:client] || NanoApi::Client.new
     end
 
+    def config= hash
+      @config = NanoApi::Config.new(hash)
+    end
+
     def config
       @config ||= begin
         file = File.join(root, 'config', 'nano_api.yml')

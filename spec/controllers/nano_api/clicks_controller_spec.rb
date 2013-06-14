@@ -70,31 +70,4 @@ describe NanoApi::ClicksController do
       get :deeplink, use_route: :nano_api, search_id: 111, id: 123
     end
   end
-
-  describe 'track_click' do
-    it 'should correctly track clicks with tracking marker' do
-      NanoApi::Client.any_instance.should_receive(:post).and_return(
-        url: 'http://test.com',
-        http_method: 'post',
-        params: {test: 'test_value'}
-      )
-      NanoApi::Client.any_instance.should_receive(:track_click).
-        with('track_id', 'http://test.host/nano_api?action=show&id=123&search_id=111')
-
-      request.cookies['astrackid'] = 'track_id'
-      get :show, use_route: :nano_api, search_id: 111, id: 123
-    end
-
-    it 'should not track clicks without tracking marker' do
-      NanoApi::Client.any_instance.should_receive(:post).and_return(
-        url: 'http://test.com',
-        http_method: 'post',
-        params: {test: 'test_value'}
-      )
-      NanoApi::Client.any_instance.should_not_receive(:track_click)
-
-      request.cookies['astrackid'] = nil
-      get :show, use_route: :nano_api, search_id: 111, id: 123
-    end
-  end
 end

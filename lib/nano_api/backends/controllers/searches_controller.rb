@@ -21,6 +21,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     increase_referer_search_count!
 
     if search_result.present?
+      response.headers['X-Search-Id'] = search_id(search_result)
       forward_json(*search_result)
     else
       render json: {}, status: :internal_server_error
@@ -41,5 +42,10 @@ private
 
   def hide_hotels_by_params?
     'false' == params[:show_hotels]
+  end
+
+  def search_id search_result
+    match = search_result.match /"search_id":(\d+)/
+    return match.captures.first if match
   end
 end

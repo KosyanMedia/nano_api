@@ -104,7 +104,7 @@ describe NanoApi::SearchesController do
 
   describe 'POST :create' do
     before do
-      NanoApi::Client.any_instance.stub(:search).and_return('{tickets: [{test: 1}, {test: 2}]}')
+      NanoApi::Client.any_instance.stub(:search).and_return('{"search_id":123, tickets: [{test: 1}, {test: 2}]}')
     end
 
     context do
@@ -115,7 +115,8 @@ describe NanoApi::SearchesController do
       it 'should be success' do
         response.content_type.should == Mime::JSON
         response.should be_success
-        response.body.should == '{tickets: [{test: 1}, {test: 2}]}'
+        response.body.should == '{"search_id":123, tickets: [{test: 1}, {test: 2}]}'
+        response.headers.should include({'X-Search-Id' => '123'})
       end
 
       specify{cookies[:search_params].should == assigns[:search].search_params.to_json}

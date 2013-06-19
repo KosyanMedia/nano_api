@@ -188,4 +188,29 @@ describe NanoApi::SearchesController do
       specify{controller.send(:show_hotels?).should be_true}
     end
   end
+
+  describe 'show_hotels_type' do
+    let(:params){{}}
+
+    before do
+      controller.stub(:affiliate).and_return(affiliate)
+      controller.stub(:params).and_return(params)
+    end
+
+    context 'affiliate is nil' do
+      let(:affiliate){nil}
+      specify{controller.send(:show_hotels_type).should == :without_hotels}
+    end
+
+    context 'affiliate not have key show_hotels_type' do
+      let(:affiliate){{}}
+      specify{controller.send(:show_hotels_type).should == :without_hotels}
+    end
+
+    context 'affiliate show_hotels is :original_host' do
+      let(:affiliate){{:show_hotels_type => :original_host}}
+      specify{controller.send(:show_hotels_type).should == :original_host}
+    end
+
+  end
 end

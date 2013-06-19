@@ -1,5 +1,5 @@
 class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
-  helper_method :show_hotels?
+  helper_method :show_hotels?, :show_hotels_type
 
   def new
     @search = search_instance search_params
@@ -38,6 +38,10 @@ private
     return false if hide_hotels_by_params?
 
     affiliate_attribute :show_hotels, true
+  end
+
+  def show_hotels_type
+    affiliate_attribute :show_hotels_type, :without_hotels
   end
 
   def hide_hotels_by_params?

@@ -45,6 +45,7 @@ private
   end
 
   def search_id search_result
+    return nil unless search_result.is_a?(String)
     match = search_result.match /"search_id":(\d+)/
     return match.captures.first if match
   end

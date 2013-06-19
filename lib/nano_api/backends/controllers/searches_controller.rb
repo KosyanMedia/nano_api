@@ -21,7 +21,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     increase_referer_search_count!
 
     if search_result.present?
-      response.headers['X-Search-Id'] = search_id(search_result)
+      response.headers['X-Search-Id'] = search_id(search_result) if search_result.is_a?(String)
       forward_json(*search_result)
     else
       render json: {}, status: :internal_server_error
@@ -45,8 +45,7 @@ private
   end
 
   def search_id search_result
-    return nil unless search_result.is_a?(String)
     match = search_result.match /"search_id":(\d+)/
-    return match.captures.first if match
+    match ? match.captures.first : ''
   end
 end

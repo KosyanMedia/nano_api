@@ -1,6 +1,22 @@
 require 'spec_helper'
 
 describe NanoApi::Client do
+  describe '#perform' do
+    subject(:client) { NanoApi::Client.new }
+
+    context do
+      before { stub_request(:get, "http://test.te/path.json?foo=bar&locale=en").
+        to_return(:status => 200, :body => 'answer') }
+      specify { client.send(:perform, :get, 'path', { foo: 'bar' }).should == 'answer' }
+    end
+
+    context do
+      before { stub_request(:get, "http://another.host/path.json?foo=bar&locale=en").
+        to_return(:status => 200, :body => 'answer') }
+      specify { client.send(:perform, :get, 'path', { foo: 'bar' }, { host: 'another.host' }).should == 'answer' }
+    end
+  end
+
   describe '.affiliate_marker?' do
     let(:affiliate_markers){['12346', '12346.lo']}
     let(:non_affiliate_markers){['yandex.org', '10.0.2.4', '', nil]}

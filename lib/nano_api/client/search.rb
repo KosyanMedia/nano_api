@@ -14,7 +14,7 @@ module NanoApi::Client::Search
       result
     end
 
-    post('searches', {
+    post_raw('searches', {
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
       search: {
@@ -23,7 +23,7 @@ module NanoApi::Client::Search
         marker: marker,
         params_attributes: allowed_params
       }
-    }, options.reverse_merge!(parse: false))
+    }, options)
   rescue RestClient::ResourceNotFound,
     RestClient::BadRequest,
     RestClient::Forbidden,

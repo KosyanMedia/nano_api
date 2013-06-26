@@ -1,6 +1,6 @@
 module NanoApi
   class Subscriber
-    include NanoApi::Model
+    include ActiveData::Model
 
     attribute :email
     attribute :marker

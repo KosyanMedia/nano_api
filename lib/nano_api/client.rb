@@ -29,8 +29,9 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site
-      @site ||= RestClient::Resource.new(NanoApi.config.search_server)
+    def self.site host = nil
+      host = host.presence || NanoApi.config.search_server
+      (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end
 
     def self.affiliate_marker? marker
@@ -52,41 +53,39 @@ module NanoApi
   protected
 
     def get *args
-      perform :get, *args
+      JSON.parse perform(:get, *args)
     end
 
     def post *args
-      perform :post, *args
+      JSON.parse perform(:post, *args)
     end
 
-    def get_raw path, params = {}, options = {}
-      get path, params, options.merge(parse: false)
+    def get_raw *args
+      perform(:get, *args)
     end
 
-    def post_raw path, params = {}, options = {}
-      post path, params, options.merge(parse: false)
+    def post_raw *args
+      perform(:post, *args)
     end
 
     def perform method, path, params = {}, options = {}
-      options.reverse_merge!(parse: true)
-      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
-      path += '.json'
-
       headers = {}
       if request
         params.reverse_merge!(user_ip: request.remote_ip) if request.remote_ip.present?
         headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
       end
 
+      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
+
+      path += '.json'
 
       response = if method == :get
         path = [path, params.to_query].delete_if(&:blank?).join('?')
-        site[path].send(method, headers)
+        site(options[:host])[path].send(method, headers)
       else
-        site[path].send(method, params, headers)
+        site(options[:host])[path].send(method, params, headers)
       end
-      options[:parse] ? JSON.parse(response) : response
     end
 
   end

@@ -2,9 +2,9 @@ module NanoApi::Client::Click
   YASEN_MIN_ORDER_URL_ID = 100_000
 
   def click search_id, order_url_id, params = {}
-    search_host = order_url_id.to_i >= YASEN_MIN_ORDER_URL_ID
+    host = order_url_id.to_i >= YASEN_MIN_ORDER_URL_ID
     post('searches/%s/order_urls/%d' % [search_id, order_url_id],
-      params.merge(marker: marker), {search_host: search_host}).symbolize_keys
+      params.merge(marker: marker), {host: host}).symbolize_keys
   rescue RestClient::ResourceNotFound
     nil
   end

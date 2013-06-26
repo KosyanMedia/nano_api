@@ -24,11 +24,11 @@ module NanoApi::Client::Search
     }
     search_params[:know_english] = options[:know_english] if options[:know_english]
 
-    post(url, {
+    post_raw(url, {
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
       search: search_params
-    }, options.reverse_merge!(parse: false, search_host: true))
+    }, options.reverse_merge!(host: true))
   rescue RestClient::ResourceNotFound,
     RestClient::BadRequest,
     RestClient::Forbidden,

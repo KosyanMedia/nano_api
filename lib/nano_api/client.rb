@@ -30,16 +30,17 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site search_host = false, host_key = nil
-      host = if search_host || !NanoApi.config.nano_server
-        NanoApi.config.search_server
-      else
-        host_key ||= DEFAULT_HOST_KEY
+    def self.site host = false, host_key = nil
+      unless host.is_a?(String)
+        host = if host || !NanoApi.config.nano_server
+          NanoApi.config.search_server
+        else
+          host_key ||= DEFAULT_HOST_KEY
 
-        NanoApi.config.send(host_key) || NanoApi.config.send(DEFAULT_HOST_KEY)
+          NanoApi.config.send(host_key) || NanoApi.config.send(DEFAULT_HOST_KEY)
+        end
       end
-
-      RestClient::Resource.new(host)
+      (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end
 
     def self.affiliate_marker? marker
@@ -61,27 +62,22 @@ module NanoApi
   protected
 
     def get *args
-      perform :get, *args
+      JSON.parse perform(:get, *args)
     end
 
     def post *args
-      perform :post, *args
+      JSON.parse perform(:post, *args)
     end
 
-    def get_raw path, params = {}, options = {}
-      get path, params, options.merge(parse: false)
+    def get_raw *args
+      perform(:get, *args)
     end
 
-    def post_raw path, params = {}, options = {}
-      post path, params, options.merge(parse: false)
+    def post_raw *args
+      perform(:post, *args)
     end
 
     def perform method, path, params = {}, options = {}
-      options.reverse_merge!(parse: true)
-
-      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
-      path += '.json'
-
       headers = {}
       if request
         params.reverse_merge!(user_ip: request.try(:remote_ip))
@@ -102,15 +98,17 @@ module NanoApi
         end
       end
 
+      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
 
-      response = if method == :get
+      path += '.json'
+
+      if method == :get
         path = [path, params.to_query].delete_if(&:blank?).join('?')
-        site(options[:search_host], options[:host_key])[path].send(method, headers)
+        site(options[:host], options[:host_key])[path].send(method, headers)
       else
-        site(options[:search_host], options[:host_key])[path].send(method, params, headers)
+        site(options[:host], options[:host_key])[path].send(method, params, headers)
       end
-      options[:parse] ? JSON.parse(response) : response
     end
   end
 end

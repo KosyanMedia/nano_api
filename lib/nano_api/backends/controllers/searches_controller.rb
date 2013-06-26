@@ -18,7 +18,6 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     }
 
     search_result = @search.search
-    increase_referer_search_count!
 
     if search_result.present?
       search_id = get_search_id(search_result)

@@ -7,7 +7,6 @@ module NanoApi
         include NanoApi::Controller::Apiable
         include NanoApi::Controller::Locatable
         include NanoApi::Controller::Markerable
-        include NanoApi::Controller::Referrerable
       end
     end
 

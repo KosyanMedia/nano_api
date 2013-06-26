@@ -122,25 +122,6 @@ describe NanoApi::SearchesController do
 
       specify{cookies[:search_params].should == assigns[:search].search_params.to_json}
     end
-
-    context do
-      it 'should increment current referrer searches count' do
-        request.env['HTTP_REFERER'] = 'http://ya.ru'
-        get :new, { use_route: :nano_api }
-        session[:current_referer][:search_count].should == 0
-
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 1
-
-        request.env['HTTP_REFERER'] = 'http://ya.ru'
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 2
-
-        request.env['HTTP_REFERER'] = 'http://google.com'
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 1
-      end
-    end
   end
 
   describe 'show_hotels?' do

@@ -2,7 +2,7 @@ module NanoApi
   class Search
     unloadable
 
-    include NanoApi::Model
+    include ActiveData::Model
 
     attribute :origin_iata
     attribute :origin_name, &:origin_name_default

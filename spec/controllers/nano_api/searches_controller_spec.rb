@@ -23,12 +23,12 @@ describe NanoApi::SearchesController do
           return_date: Date.parse('2012-04-01'),
           trip_class: 0,
           adults: 1
-        }.stringify_keys!
+        }
       }}
 
       context do
         before{get :new, use_route: :nano_api}
-        specify{assigns[:search].attributes.should include({'origin_name' => 'Moscow', 'origin_iata' => 'MOW'})}
+        specify{assigns[:search].attributes.should include({origin_name: 'Moscow', origin_iata: 'MOW'})}
       end
 
       context 'unwrapped params without affiliate' do
@@ -51,7 +51,7 @@ describe NanoApi::SearchesController do
         let(:cookies_defaults){{
           origin_iata: 'MOW',
           destination_iata: 'LON'
-        }.stringify_keys!}
+        }}
         before do
           cookies.stub(:[]).with(:marker).and_return('direct')
           cookies.stub(:[]).with(:search_params) do

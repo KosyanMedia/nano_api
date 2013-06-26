@@ -1,6 +1,6 @@
 module NanoApi
   class FareAlert
-    include NanoApi::Model
+    include ActiveData::Model
 
     attribute :origin_iata
     attribute :origin_name

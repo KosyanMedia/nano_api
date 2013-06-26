@@ -16,6 +16,7 @@ module NanoApi
     include NanoApi::Client::UiEvents
     include NanoApi::Client::Overmind
     include NanoApi::Client::Affiliate
+    include NanoApi::Client::WhiteLabel
 
     attr_reader :controller
     delegate :request, :session, :marker, to: :controller, allow_nil: true

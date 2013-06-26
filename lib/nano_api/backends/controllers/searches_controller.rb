@@ -18,7 +18,6 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     }
 
     search_result = @search.search(search_options)
-    increase_referer_search_count!
 
     if search_result.present?
       if search_result.is_a?(String)

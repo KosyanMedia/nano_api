@@ -1,17 +1,17 @@
 module NanoApi
   class Feedback
-    include NanoApi::Model
+    include ActiveData::Model
 
     attribute :search_id, type: String
     attribute :gate_id, type: Integer
     attribute :success, type: Boolean
     attribute :rating, type: Integer, in: 1..5
-    attribute :answers, type: Hash, :default => {}
+    attribute :answers, type: Hash, default: {}
     attribute :host
     attribute :user_ip
     attribute :user_agent
 
-    attr_accessible :answers, :success, :rating, :gate_id, :search_id
+    # attr_accessible :answers, :success, :rating, :gate_id, :search_id
 
     validates :search_id, presence: true
     validates :gate_id, presence: true, numericality: {only_integer: true}

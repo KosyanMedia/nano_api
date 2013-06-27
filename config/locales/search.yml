@@ -1,5 +1,5 @@
 en:
-  nano_model:
+  active_data:
     attributes:
       nano_api/search:
         origin_name: Origin

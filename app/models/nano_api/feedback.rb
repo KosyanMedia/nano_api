@@ -23,7 +23,7 @@ module NanoApi
     end
 
     def save
-      NanoApi.client.send :post_raw, 'user_feedback_reports', :user_feedback_report => present_attributes
+      NanoApi.client.send :post_raw, 'user_feedback_reports', :user_feedback_report => existing_attributes
     rescue RestClient::UnprocessableEntity
       false
     ensure

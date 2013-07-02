@@ -30,5 +30,12 @@ module NanoApi
     ensure
       true
     end
+
+    def existing_attributes
+      Hash[attribute_names.map do |name|
+        value = send(name)
+        [name, value] unless value.respond_to?(:empty?) ? value.empty? : value.nil?
+      end]
+    end
   end
 end

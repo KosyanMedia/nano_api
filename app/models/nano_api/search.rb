@@ -15,6 +15,8 @@ module NanoApi
     attribute :children, type: Integer, in: (0..8), default: 0
     attribute :infants, type: Integer, in: (0..5), default: 0
     attribute :feature
+    attribute :host, type: String
+    attribute :marker, type: String
 
     alias_method :oneway=, :one_way=
 

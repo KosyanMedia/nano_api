@@ -87,10 +87,10 @@ module NanoApi
         Hash[attribute_names.map { |name| [name, send(name)] }]
       end
 
-      def present_attributes
+      def existing_attributes
         Hash[attribute_names.map do |name|
           value = send(name)
-          [name, value] if value.present?
+          [name, value] unless value.respond_to?(:empty?) ? value.empty? : value.nil?
         end]
       end
 

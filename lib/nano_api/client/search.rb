@@ -8,7 +8,7 @@ module NanoApi::Client::Search
 
   def search params, options = {}
     params.symbolize_keys!
-    marker = api_client_marker(controller.try(:marker))
+    marker = params[:marker].presence || api_client_marker(controller.try(:marker))
     allowed_params = params.slice(*SEARCH_PARAMS_KEYS).inject({}) do |result, (key, value)|
       result[key] = value if value.present?
       result
@@ -18,7 +18,7 @@ module NanoApi::Client::Search
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
       search: {
-        host: request.try(:host),
+        host: params[:host].presence || request.try(:host),
         user_ip: request.try(:remote_ip),
         marker: marker,
         params_attributes: allowed_params

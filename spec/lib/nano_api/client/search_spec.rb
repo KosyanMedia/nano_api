@@ -16,11 +16,14 @@ describe NanoApi::Client do
         stub_http_request(:post, fake).to_return(body: '{tickets: [{test: 1}, {test: 2}]}')
       end
 
-      it 'should require api for search action with given params' do
+      it 'returns signature as set in api_client_signature' do
         subject.stub(:api_client_signature).and_return('test_signature')
-        rest_client.stub(:[]).with('searches.json').and_return(subject)
+        subject.should_receive(:post_raw).with 'searches', hash_including(signature: 'test_signature'), {}
+        subject.search({})
+      end
+
+      it 'requires api for search action with given params' do
         subject.should_receive(:post_raw).with 'searches', hash_including(
-          signature: 'test_signature',
           search: {
             host: 'test.com',
             marker: '12346.test',
@@ -31,7 +34,22 @@ describe NanoApi::Client do
           }
         ), {host: true }
 
-        subject.search(marker: 'test', origin_iata: 'LED')
+        subject.search(origin_iata: 'LED')
+      end
+
+      it 'uses marker and host params' do
+        subject.should_receive(:post_raw).with 'searches', hash_including(
+          search: {
+            host: 'bar.com',
+            marker: 'foo',
+            user_ip: '127.1.1.1',
+            params_attributes: {
+              origin_iata: 'LED'
+            }
+          }
+        ), {}
+
+        subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com')
       end
 
       it 'should return api response without any modifications' do

@@ -20,7 +20,7 @@ module NanoApi::Client::Search
       locale: extract_locale(params),
       search: {
         host: params[:host].presence || request.try(:host),
-        user_ip: request.try(:remote_ip),
+        user_ip: params[:user_ip].presence || request.try(:remote_ip),
         marker: marker,
         params_attributes: allowed_params
       }

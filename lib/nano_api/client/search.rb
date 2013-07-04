@@ -17,9 +17,10 @@ module NanoApi::Client::Search
     post_raw('searches', {
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
+      locale: extract_locale(params),
       search: {
         host: params[:host].presence || request.try(:host),
-        user_ip: request.try(:remote_ip),
+        user_ip: params[:user_ip].presence || request.try(:remote_ip),
         marker: marker,
         params_attributes: allowed_params
       }
@@ -45,6 +46,10 @@ module NanoApi::Client::Search
   end
 
 private
+  def extract_locale params
+    locale = params[:locale].presence || I18n.locale
+    NanoApi::Client::MAPPING[locale] || locale
+  end
 
   def api_client_signature marker, params
     Digest::MD5.hexdigest(

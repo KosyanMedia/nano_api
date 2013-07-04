@@ -24,6 +24,7 @@ describe NanoApi::Client do
 
       it 'requires api for search action with given params' do
         subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :en,
           search: {
             host: 'test.com',
             marker: '12346.test',
@@ -39,6 +40,7 @@ describe NanoApi::Client do
 
       it 'uses marker and host params' do
         subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :en,
           search: {
             host: 'bar.com',
             marker: 'foo',
@@ -50,6 +52,22 @@ describe NanoApi::Client do
         ), {}
 
         subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com')
+      end
+
+      it 'uses marker, host, user_ip and locale params' do
+        subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :'en_GB',
+          search: {
+            host: 'bar.com',
+            marker: 'foo',
+            user_ip: '127.1.1.2',
+            params_attributes: {
+              origin_iata: 'LED'
+            }
+          }
+        ), {}
+
+        subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com', locale: :'en-GB', user_ip: '127.1.1.2')
       end
 
       it 'should return api response without any modifications' do

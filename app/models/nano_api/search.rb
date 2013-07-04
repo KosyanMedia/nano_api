@@ -17,6 +17,8 @@ module NanoApi
     attribute :feature
     attribute :host, type: String
     attribute :marker, type: String
+    attribute :user_ip, type: String
+    attribute :locale, type: String
 
     alias_method :oneway=, :one_way=
     alias_method :oneway, :one_way

@@ -47,8 +47,8 @@ module NanoApi::Client::Search
 
 private
   def extract_locale params
-    NanoApi::Client::MAPPING[params[:locale].presence] || params[:locale].presence ||
-      NanoApi::Client::MAPPING[I18n.locale] || I18n.locale
+    locale = params[:locale].presence || I18n.locale
+    NanoApi::Client::MAPPING[locale] || locale
   end
 
   def api_client_signature marker, params

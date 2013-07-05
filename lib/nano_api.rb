@@ -24,3 +24,5 @@ module NanoApi
     end
   end
 end
+
+ActiveSupport.run_load_hooks(:nano_api)

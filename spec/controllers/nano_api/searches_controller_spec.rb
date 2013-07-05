@@ -52,12 +52,13 @@ describe NanoApi::SearchesController do
           origin_iata: 'MOW',
           destination_iata: 'LON'
         }}
+
         before do
           cookies.stub(:[]).with(:marker).and_return('direct')
           cookies.stub(:[]).with(:search_params) do
             {
               params_attributes: {
-                origin: { iata: 'BKK' },
+                origin: { iata: 'MOW' },
                 destination: { iata: 'LON' }
               }
             }.to_json

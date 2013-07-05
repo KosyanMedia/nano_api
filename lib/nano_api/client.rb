@@ -15,7 +15,6 @@ module NanoApi
     include NanoApi::Client::Places
     include NanoApi::Client::MinimalPrices
     include NanoApi::Client::Airlines
-    include NanoApi::Client::UiEvents
     include NanoApi::Client::Overmind
     include NanoApi::Client::Affiliate
     include NanoApi::Client::WhiteLabel

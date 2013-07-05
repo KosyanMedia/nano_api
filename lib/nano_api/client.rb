@@ -2,6 +2,8 @@ require 'active_support/core_ext/hash'
 require 'json'
 require 'digest/md5'
 
+Dir[NanoApi::Engine.root.join(*%w(lib nano_api client *.rb))].each { |f| require f }
+
 module NanoApi
   class Client
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/

@@ -14,7 +14,7 @@ module NanoApi
     attribute :one_way, type: Boolean, default: false
     attribute :trip_class, type: Integer, in: (0..2), default: 0
     attribute :adults, type: Integer, in: (1..9), default: 1
-    attribute :children, type: Integer, in: (0..5), default: 0
+    attribute :children, type: Integer, in: (0..8), default: 0
     attribute :infants, type: Integer, in: (0..5), default: 0
     attribute :feature
 

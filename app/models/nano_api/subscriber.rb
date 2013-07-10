@@ -5,6 +5,7 @@ module NanoApi
     attribute :email
     attribute :marker
     attribute :frozen_until, type: Date
+    attribute :recieve_news, type: Boolean
 
     embeds_many :fare_alerts, :class_name => 'NanoApi::FareAlert'
 

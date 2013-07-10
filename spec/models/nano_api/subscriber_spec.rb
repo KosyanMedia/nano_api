@@ -11,12 +11,12 @@ describe NanoApi::Subscriber do
     context do
       specify do
         RestClient::Resource.any_instance.should_receive(:post).with(hash_including(
-          :signature => NanoApi::Client.signature('', subscriber.email)
+          :signature => NanoApi::Client.signature('', subscriber.email),
+          'subscriber' => hash_including('recieve_news' => true)
         ), anything)
         subscriber.save
       end
     end
   end
-
 
 end

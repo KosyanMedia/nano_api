@@ -20,10 +20,10 @@ describe NanoApi::Client do
     end
 
     context do
-      before do 
+      before do
         stub_request(:get, "http://test.te/path.json?foo=bar&locale=de&user_ip=127.0.0.3").
           with(headers: {'Accept-Language' => 'lang'}).
-          to_return(:status => 200, :body => 'answer') 
+          to_return(:status => 200, :body => 'answer')
       end
 
       specify do

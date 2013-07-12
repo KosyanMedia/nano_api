@@ -16,11 +16,6 @@ module NanoApi
     attribute :infants, type: Integer, in: (0..5), default: 0
     attribute :feature # WTF????
 
-    attribute :host, type: String
-    attribute :marker, type: String
-    attribute :user_ip, type: String
-    attribute :locale, type: String
-
     alias_method :oneway=, :one_way=
     alias_method :oneway, :one_way
 

@@ -5,7 +5,7 @@ describe NanoApi::Search do
   subject { search }
 
   [:origin, :destination].each do |place|
-    describe ".#{place}" do
+    describe "##{place}" do
       context do
         before{
           search.send("#{place}_name=", 'Foo')
@@ -32,7 +32,7 @@ describe NanoApi::Search do
     end
   end
 
-  describe '.origin=' do
+  describe '#origin=' do
     context 'hash value' do
       before{search.origin = {name: 'Foo', iata: 'Bar'}}
       specify{search.origin_name.should == 'Moscow'}
@@ -45,7 +45,7 @@ describe NanoApi::Search do
     end
   end
 
-  describe '.destination=' do
+  describe '#destination=' do
     context 'hash value' do
       before{search.destination = {name: 'Foo', iata: 'Bar'}}
       specify{search.destination_name.should == 'London'}
@@ -56,6 +56,24 @@ describe NanoApi::Search do
       specify{search.destination_name.should == 'Hello'}
       specify{search.destination_iata.should be_nil}
     end
+  end
+
+  describe '#attributes_for_search' do
+    specify { described_class.new.attributes_for_search.keys.should =~ [
+      :depart_date, :return_date, :range, :one_way, :trip_class, :adults, :children, :infants
+    ] }
+    specify { described_class.new(origin_iata: 'MOW').attributes_for_search.keys.should =~ [
+      :depart_date, :return_date, :range, :one_way, :trip_class, :adults, :children, :infants, :origin_iata, :origin_name
+    ] }
+  end
+
+  describe '#attributes_for_cookies' do
+    specify { described_class.new.attributes_for_cookies.keys.should =~ [
+      :depart_date, :return_date, :range, :one_way, :trip_class, :adults, :children, :infants
+    ] }
+    specify { described_class.new(origin_iata: 'MOW').attributes_for_cookies.keys.should =~ [
+      :depart_date, :return_date, :range, :one_way, :trip_class, :adults, :children, :infants, :origin_iata, :origin_name
+    ] }
   end
 
   describe 'names defaults' do

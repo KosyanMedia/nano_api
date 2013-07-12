@@ -123,7 +123,6 @@ describe NanoApi::Client do
     end
   end
 
-
   describe '.api_client_signature' do
     it 'should generate correct signature' do
       subject.send(:api_client_signature, 'test', {origin: 'MOW', destination: 'LED'}).should ==

@@ -7,7 +7,16 @@ Dir[NanoApi::Engine.root.join(*%w(lib nano_api client *.rb))].each { |f| require
 module NanoApi
   class Client
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
-    MAPPING = { :'zh-CN' => :cn, :'en-GB' => :'en_GB', :'en-AU' => :'en_AU' }
+    MAPPING = {
+      :'zh-CN' => :cn,
+      :'en-GB' => :en_GB,
+      :'en-IE' => :en_GB,
+      :'en-AU' => :en_AU,
+      :'en-NZ' => :en_AU,
+      :'en-IN' => :en,
+      :'en-SG' => :en,
+      :'en-CA' => :en
+    }
 
     include NanoApi::Client::Search
     include NanoApi::Client::Click

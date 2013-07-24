@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-Timeliness.add_formats :date, 'd mmmm yy', before: 'm/d/yy'
+Timeliness.add_formats :date, 'd mmm yy', before: 'm/d/yy'
 Timeliness.add_formats :date, 'yy年m月d日'
 
 Timeliness.month_names [

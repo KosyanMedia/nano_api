@@ -1,7 +1,5 @@
 module NanoApi
   class Search
-    unloadable
-
     include NanoApi::Model
 
     attribute :origin_iata

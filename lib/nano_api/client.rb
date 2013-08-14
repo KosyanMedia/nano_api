@@ -15,7 +15,10 @@ module NanoApi
       :'en-NZ' => :en_AU,
       :'en-IN' => :en,
       :'en-SG' => :en,
-      :'en-CA' => :en
+      :'en-CA' => :en,
+      :fr => :en,
+      :it => :en,
+      :es => :en
     }
 
     include NanoApi::Client::Search

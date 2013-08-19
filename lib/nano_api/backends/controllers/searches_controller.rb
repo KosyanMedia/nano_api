@@ -13,7 +13,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def create
     @search = NanoApi::Search.new(search_params)
     cookies[:search_params] = {
-      :value => @search.search_params.to_json,
+      :value => search_params_for_cookies(@search.search_params),
       :domain => default_nano_domain
     }
 
@@ -29,6 +29,10 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
 private
+
+  def search_params_for_cookies search_params
+    search_params.to_json
+  end
 
   def search_params
     params[:search].is_a?(Hash) ? params[:search] : params

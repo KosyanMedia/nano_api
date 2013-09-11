@@ -29,7 +29,7 @@ describe NanoApi::Client do
               origin_iata: 'LED'
             }
           }
-        ), { parse: false }
+        ), { parse: false, search_host: true }
 
         subject.search(marker: 'test', origin_iata: 'LED')
       end

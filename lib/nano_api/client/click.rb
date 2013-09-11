@@ -1,7 +1,7 @@
 module NanoApi::Client::Click
 
   def click search_id, order_url_id, params = {}
-    post('searches/%d/order_urls/%d' % [search_id, order_url_id], params.merge(marker: marker)).symbolize_keys
+    post('searches/%s/order_urls/%d' % [search_id, order_url_id], params.merge(marker: marker)).symbolize_keys
   rescue RestClient::ResourceNotFound
     nil
   end

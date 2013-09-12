@@ -38,7 +38,8 @@ describe NanoApi::ClicksController do
   describe 'GET show' do
     it 'should make api call with marker' do
       NanoApi::Client.any_instance.should_receive(:post).
-        with('searches/111/order_urls/123', hash_including(marker: 'direct')).and_return(
+        with('searches/111/order_urls/123', hash_including(marker: 'direct'), {search_host: false}).
+        and_return(
           url: 'http://test.com',
           http_method: 'post',
           params: {test: 'test_value'}

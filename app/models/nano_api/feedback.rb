@@ -2,7 +2,7 @@ module NanoApi
   class Feedback
     include NanoApi::Model
 
-    attribute :search_id, type: Integer
+    attribute :search_id, type: String
     attribute :gate_id, type: Integer
     attribute :success, type: Boolean
     attribute :rating, type: Integer, in: 1..5
@@ -13,7 +13,8 @@ module NanoApi
 
     attr_accessible :answers, :success, :rating, :gate_id, :search_id
 
-    validates :search_id, :gate_id, presence: true, numericality: {only_integer: true}
+    validates :search_id, presence: true
+    validates :gate_id, presence: true, numericality: {only_integer: true}
     validates :rating, inclusion: rating_values, numericality: {only_integer: true}, allow_blank: true
 
     def request= request

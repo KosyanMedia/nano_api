@@ -1,3 +1,6 @@
+require 'net/http'
+require 'uri'
+
 class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   helper_method :show_hotels?, :show_hotels_type
 
@@ -21,7 +24,11 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     increase_referer_search_count!
 
     if search_result.present?
-      response.headers['X-Search-Id'] = search_id(search_result) if search_result.is_a?(String)
+      search_id = get_search_id(search_result)
+      auid = request.cookies[:auid]
+      track_search(search_id, auid)
+
+      response.headers['X-Search-Id'] = search_id if search_result.is_a?(String)
       forward_json(*search_result)
     else
       render json: {}, status: :internal_server_error
@@ -52,8 +59,17 @@ private
     'false' == params[:show_hotels]
   end
 
-  def search_id search_result
-    match = search_result.match /"search_id":(\d+)/
-    match ? match.captures.first : ''
+  def get_search_id search_result
+    match = search_result.match /"search_id":"([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})"/
+    #TODO:remove this string. Temp here for backward compatibility with nano search
+    match = search_result.match /"search_id":(\d+)/ unless match
+    id = match ? match.captures.first : ''
+  end
+
+  def track_search search_id, auid
+    Thread.new do
+      uri = URI.parse(NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}")
+      Net::HTTP.get(uri)
+    end
   end
 end

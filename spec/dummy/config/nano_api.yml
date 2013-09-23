@@ -2,6 +2,7 @@ test:
   api_token: test_key
   search_server: 'http://test.te'
   data_server: 'http://test2.te'
+  pulse_server: 'http://test.te/'
   marker: 12346
   bitly:
     hello: 'world'
@@ -10,4 +11,5 @@ development:
   api_token: test_key
   search_server: 'http://test.te'
   data_server: 'http://beta-overmind.jetradar.com'
+  pulse_server: 'http://test.te/'
   marker:

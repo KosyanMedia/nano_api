@@ -60,7 +60,7 @@ private
   end
 
   def get_search_id search_result
-    match = search_result.match /"search_id":"([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})"/
+    match = search_result.match /"search_id":\s*"([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12})"/
     #TODO:remove this string. Temp here for backward compatibility with nano search
     match = search_result.match /"search_id":(\d+)/ unless match
     id = match ? match.captures.first : ''

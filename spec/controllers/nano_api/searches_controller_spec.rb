@@ -223,20 +223,28 @@ describe NanoApi::SearchesController do
     before { stub_http_request(:get, request_uri) }
 
     it "sends get request in thread" do
-      Net::HTTP.should_receive(:get).with(URI.parse(request_uri))
-
-      thread = controller.send(:track_search, search_id, auid)
-      thread.join
+      RestClient.should_receive(:get).with(request_uri)
+      controller.send(:track_search, search_id, auid)
     end
   end
 
   describe '#get_search_id' do
-    let(:some_string){ "abcd" }
-    let(:guid){ "442966fd-81fb-4415-91ab-0797849a7327" }
-    let(:number){ 12345 }
+    let(:json){ JSON.dump({search_id: search_id}) }
+    subject{ controller.send(:get_search_id, json) }
 
-    specify { controller.send(:get_search_id, "{\"search_id\":#{some_string}").should be_empty }
-    specify { controller.send(:get_search_id, "{\"search_id\": \"#{guid}\"}").should == guid }
-    specify { controller.send(:get_search_id, "{\"search_id\":#{number}}").should == number.to_s }
+    context 'with invalid value' do
+      let(:search_id){ 'abcd' }
+      it{ should be_empty }
+    end
+
+    context 'with uuid' do
+      let(:search_id){ '442966fd-81fb-4415-91ab-0797849a7327' }
+      it{ should == search_id }
+    end
+
+    context 'with integer id' do
+      let(:search_id){ 12345 }
+      it{ should == search_id.to_s }
+    end
   end
 end

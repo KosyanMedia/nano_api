@@ -223,7 +223,12 @@ describe NanoApi::SearchesController do
     before { stub_http_request(:get, request_uri) }
 
     it "sends get request in thread" do
-      RestClient.should_receive(:get).with(request_uri)
+      RestClient::Request.should_receive(:execute).with(
+        method: :get,
+        url: request_uri,
+        timeout: 3.seconds,
+        open_timeout: 3.seconds
+      )
       controller.send(:track_search, search_id, auid)
     end
   end

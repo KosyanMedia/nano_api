@@ -13,8 +13,8 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def create
     @search = NanoApi::Search.new(search_params)
     cookies[:search_params] = {
-      :value => search_params_for_cookies(@search.search_params),
-      :domain => default_nano_domain
+      value: search_params_for_cookies(@search.search_params),
+      domain: default_nano_domain
     }
 
     search_result = @search.search
@@ -64,6 +64,9 @@ private
   end
 
   def track_search search_id, auid
-    RestClient.get(NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}")
+    url = NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}"
+    RestClient::Request.execute(method: :get, url: url, timeout: 3.seconds, open_timeout: 3.seconds)
+  rescue => e # Gotta cach 'em all
+    Rollbar.report_exception(e)
   end
 end

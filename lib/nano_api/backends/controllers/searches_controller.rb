@@ -66,7 +66,7 @@ private
   def track_search search_id, auid
     url = NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}"
     RestClient::Request.execute(method: :get, url: url, timeout: 3.seconds, open_timeout: 3.seconds)
-  rescue => e # Gotta cach 'em all
+  rescue => e # Gotta catch 'em all
     Rollbar.report_exception(e)
   end
 end

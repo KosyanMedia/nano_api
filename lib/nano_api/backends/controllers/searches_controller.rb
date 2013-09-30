@@ -22,9 +22,8 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
     if search_result.present?
       search_id = get_search_id(search_result)
-      auid = request.cookies[:auid]
+      auid = request.cookies['auid']
       track_search(search_id, auid)
-
       response.headers['X-Search-Id'] = search_id if search_result.is_a?(String)
       forward_json(*search_result)
     else

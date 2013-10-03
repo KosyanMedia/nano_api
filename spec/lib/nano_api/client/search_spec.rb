@@ -3,8 +3,8 @@ require 'spec_helper'
 describe NanoApi::Client do
   let(:rest_client) { NanoApi::Client.send(:site) }
   let(:fake) { %r{^#{URI.join(NanoApi.config.search_server, path)}} }
-  let(:controller) { mock(marker: 'test', session: {}, request:
-    mock(host: 'test.com', env: {}, remote_ip: '127.1.1.1')) }
+  let(:controller) { double(marker: 'test', session: {}, request:
+    double(host: 'test.com', env: {}, remote_ip: '127.1.1.1')) }
   subject { NanoApi::Client.new controller }
 
 
@@ -97,12 +97,12 @@ describe NanoApi::Client do
 
   describe '.api_client_marker' do
     it 'should add marker from config' do
-      NanoApi.stub(:config).and_return(mock(:marker => '12345'))
+      NanoApi.stub(:config).and_return(double(:marker => '12345'))
       subject.send(:api_client_marker, 'test').should == '12345.test'
     end
 
     it 'should work with empty marker in config' do
-      NanoApi.stub(:config).and_return(mock(:marker => nil))
+      NanoApi.stub(:config).and_return(double(:marker => nil))
       subject.send(:api_client_marker, 'test').should == 'test'
     end
   end

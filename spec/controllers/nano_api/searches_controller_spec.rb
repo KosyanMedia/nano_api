@@ -105,6 +105,7 @@ describe NanoApi::SearchesController do
   describe 'POST :create' do
     before do
       NanoApi::Client.any_instance.stub(:search).and_return('{"search_id":123, tickets: [{test: 1}, {test: 2}]}')
+      stub_http_request(:get, NanoApi.config.pulse_server + "?event=search&search_id=123&auid=")
     end
 
     context do
@@ -212,5 +213,43 @@ describe NanoApi::SearchesController do
       specify{controller.send(:show_hotels_type).should == :original_host}
     end
 
+  end
+
+  describe '#track_search' do
+    let(:search_id){ 123 }
+    let(:auid){ "test_string" }
+    let(:request_uri){ NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}" }
+
+    before { stub_http_request(:get, request_uri) }
+
+    it "sends get request in thread" do
+      RestClient::Request.should_receive(:execute).with(
+        method: :get,
+        url: request_uri,
+        timeout: 3.seconds,
+        open_timeout: 3.seconds
+      )
+      controller.send(:track_search, search_id, auid)
+    end
+  end
+
+  describe '#get_search_id' do
+    let(:json){ JSON.dump({search_id: search_id}) }
+    subject{ controller.send(:get_search_id, json) }
+
+    context 'with invalid value' do
+      let(:search_id){ 'abcd' }
+      it{ should be_empty }
+    end
+
+    context 'with uuid' do
+      let(:search_id){ '442966fd-81fb-4415-91ab-0797849a7327' }
+      it{ should == search_id }
+    end
+
+    context 'with integer id' do
+      let(:search_id){ 12345 }
+      it{ should == search_id.to_s }
+    end
   end
 end

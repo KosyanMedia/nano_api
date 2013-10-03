@@ -72,7 +72,7 @@ describe NanoApi::Client do
     }}
 
     let(:controller) do
-      mock(marker: '12345', session: {}, request: mock(host: 'test.com', env: {}, remote_ip: '127.1.1.1'))
+      double(marker: '12345', session: {}, request: double(host: 'test.com', env: {}, remote_ip: '127.1.1.1'))
     end
 
     subject { NanoApi::Client.new controller }

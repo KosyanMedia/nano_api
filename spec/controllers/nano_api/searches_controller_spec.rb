@@ -217,15 +217,23 @@ describe NanoApi::SearchesController do
 
   describe '#track_search' do
     let(:search_id){ 123 }
-    let(:auid){ "test_string" }
-    let(:request_uri){ NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}" }
+    let(:marker){ '12345.foobar' }
+    let(:auid){ 'test_string' }
+    let(:agent){ 'Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 5.1)' }
+    let(:referer){ 'http://example.com' }
+    let(:request_uri){ NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&marker=#{marker}" }
 
     before { stub_http_request(:get, request_uri) }
+    before { controller.stub(:marker).and_return(marker) }
+    before { controller.stub(:request).and_return(double({headers: {'User-Agent' => agent, 'Referer' => referer}})) }
+    before { controller.stub(:cookies).and_return({auid: auid}) }
 
     it "sends get request in thread" do
       RestClient::Request.should_receive(:execute).with(
         method: :get,
         url: request_uri,
+        headers: {'User-Agent' => agent, 'Referer' => referer},
+        cookies: {auid: auid},
         timeout: 3.seconds,
         open_timeout: 3.seconds
       )

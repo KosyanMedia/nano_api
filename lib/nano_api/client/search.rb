@@ -35,7 +35,7 @@ module NanoApi::Client::Search
   end
 
   def search_params id
-    result = get('/searches/%d' % id)
+    result = get('/searches/%s' % id)
     result.merge!('one_way' => true) if result['return_date'].blank?
     result
   end

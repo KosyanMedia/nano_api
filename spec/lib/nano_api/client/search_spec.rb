@@ -18,7 +18,7 @@ describe NanoApi::Client do
 
       it 'returns signature as set in api_client_signature' do
         subject.stub(:api_client_signature).and_return('test_signature')
-        subject.should_receive(:post_raw).with 'searches', hash_including(signature: 'test_signature'), {}
+        subject.should_receive(:post_raw).with 'searches', hash_including(signature: 'test_signature'), {host: true}
         subject.search({})
       end
 
@@ -49,7 +49,7 @@ describe NanoApi::Client do
               origin_iata: 'LED'
             }
           }
-        ), {}
+        ), {host: true}
 
         subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com')
       end
@@ -65,7 +65,7 @@ describe NanoApi::Client do
               origin_iata: 'LED'
             }
           }
-        ), {}
+        ), {host: true}
 
         subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com', locale: :'en-GB', user_ip: '127.1.1.2')
       end

@@ -21,8 +21,6 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
     if search_result.present?
       search_id = get_search_id(search_result)
-      auid = request.cookies['auid'].to_s.gsub(/\s/, '+')
-      track_search(search_id, auid)
       response.headers['X-Search-Id'] = search_id if search_result.is_a?(String)
       forward_json(*search_result)
     else
@@ -59,13 +57,5 @@ private
     # Backward compatibility with nano search
     match = search_result.match /"search_id":(\d+)/ unless match
     id = match ? match.captures.first : ''
-  end
-
-  def track_search search_id, auid
-    return unless NanoApi.config.pulse_server.present?
-    url = NanoApi.config.pulse_server + "/?event=search&search_id=#{search_id}&auid=#{auid}&marker=#{marker}"
-    RestClient::Request.execute(method: :get, url: url, timeout: 3.seconds, open_timeout: 3.seconds)
-  rescue => e # Gotta catch 'em all
-    Rollbar.report_exception(e)
   end
 end

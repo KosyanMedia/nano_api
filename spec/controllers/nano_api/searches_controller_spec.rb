@@ -197,24 +197,6 @@ describe NanoApi::SearchesController do
 
   end
 
-  describe '#track_search' do
-    let(:search_id){ 123 }
-    let(:auid){ "test_string" }
-    let(:request_uri){ NanoApi.config.pulse_server + "?event=search&search_id=#{search_id}&auid=#{auid}" }
-
-    before { stub_http_request(:get, request_uri) }
-
-    it "sends get request in thread" do
-      RestClient::Request.should_receive(:execute).with(
-        method: :get,
-        url: request_uri,
-        timeout: 3.seconds,
-        open_timeout: 3.seconds
-      )
-      controller.send(:track_search, search_id, auid)
-    end
-  end
-
   describe '#get_search_id' do
     let(:json){ JSON.dump({search_id: search_id}) }
     subject{ controller.send(:get_search_id, json) }

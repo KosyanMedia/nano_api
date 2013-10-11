@@ -64,7 +64,7 @@ private
 
   def track_search search_id, auid
     return unless NanoApi.config.pulse_server.present?
-    url = NanoApi.config.pulse_server + "/?event=search&search_id=#{search_id}&auid=#{auid}&marker=#{marker}"
+    url = NanoApi.config.pulse_server + "/?event=search&search_id=#{search_id}&auid=#{auid}&marker=#{URI.encode(marker)}"
     RestClient::Request.execute(method: :get, url: url, timeout: 3.seconds, open_timeout: 3.seconds)
   rescue => e # Gotta catch 'em all
     Rollbar.report_exception(e) if defined?(Rollbar)

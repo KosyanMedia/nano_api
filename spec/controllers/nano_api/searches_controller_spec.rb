@@ -218,15 +218,15 @@ describe NanoApi::SearchesController do
   describe '#track_search' do
     let(:search_id){ 123 }
     let(:auid){ :test_string }
-    let(:marker){ :marker }
-    let(:request_uri){ NanoApi.config.pulse_server + "/?event=search&search_id=#{search_id}&auid=#{auid}&marker=#{marker}" }
+    let(:marker){ '123.фыва и олдж' }
+    let(:request_uri){ NanoApi.config.pulse_server + "/?event=search&search_id=#{search_id}&auid=#{auid}&marker=#{URI.encode(marker)}" }
 
     before do
       stub_http_request(:get, request_uri)
       controller.stub(:marker).and_return(marker)
     end
 
-    it "sends get request in thread" do
+    it "sends get request" do
       RestClient::Request.should_receive(:execute).with(
         method: :get,
         url: request_uri,

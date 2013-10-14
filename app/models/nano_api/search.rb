@@ -17,6 +17,7 @@ module NanoApi
     attribute :feature
 
     alias_method :oneway=, :one_way=
+    alias_method :oneway, :one_way
 
     def passengers
       [adults, children, infants].sum
@@ -32,7 +33,7 @@ module NanoApi
 
       define_method "#{name}=" do |data|
         if data.is_a?(Hash)
-          data.symbolize_keys!
+          data.symbolize_keys! unless data.is_a?(HashWithIndifferentAccess)
           send "#{name}_name=", data[:name] if !send("#{name}_name?") && data.key?(:name)
           send "#{name}_iata=", data[:iata] if !send("#{name}_iata?") && data.key?(:iata)
         else
@@ -77,8 +78,8 @@ module NanoApi
     def search_params
       {
         :params_attributes =>
-          Hash[['origin', 'destination', 'depart_date', 'return_date',
-          'range', 'adults', 'children', 'infants', 'trip_class'].map do |name|
+          Hash[['origin', 'destination', 'depart_date', 'return_date', 'range',
+          'adults', 'children', 'infants', 'trip_class', 'one_way', 'oneway'].map do |name|
             [name, send(name)]
           end]
       }

@@ -21,7 +21,8 @@ module NanoApi::Client::Search
         host: request.try(:host),
         user_ip: request.try(:remote_ip),
         marker: marker,
-        params_attributes: allowed_params
+        params_attributes: allowed_params,
+        know_english: options[:know_english]
       }
     }, options.reverse_merge!(parse: false, search_host: true))
   rescue RestClient::ResourceNotFound,

@@ -11,10 +11,9 @@ module NanoApi
     attribute :user_ip
     attribute :user_agent
 
-    # attr_accessible :answers, :success, :rating, :gate_id, :search_id
-
     validates :search_id, presence: true
     validates :gate_id, presence: true, numericality: {only_integer: true}
+
     validates :rating, inclusion: rating_values, numericality: {only_integer: true}, allow_blank: true
 
     def request= request

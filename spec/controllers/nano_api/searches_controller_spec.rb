@@ -78,31 +78,6 @@ describe NanoApi::SearchesController do
     end
   end
 
-  describe 'GET :show' do
-    let(:params){{
-      search: {
-        params_attributes: {
-          origin_iata: 'LED',
-          destination_iata: 'LED',
-          depart_date: '2012-04-01',
-          return_date: '2012-04-01',
-          trip_class: 0,
-          adults: 1
-        }
-      }
-    }}
-
-    before do
-      NanoApi::Client.any_instance.stub(:search_params).with('1').and_return(params)
-    end
-
-    it 'should be successful' do
-      get :show, id: 1, use_route: :nano_api
-      response.should be_success
-      response.should render_template(:new)
-    end
-  end
-
   describe 'POST :create' do
     before do
       NanoApi::Client.any_instance.stub(:search).and_return('{"search_id":123, tickets: [{test: 1}, {test: 2}]}')

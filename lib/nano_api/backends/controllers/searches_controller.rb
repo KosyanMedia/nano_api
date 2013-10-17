@@ -5,11 +5,6 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     @search = search_instance search_params
   end
 
-  def show
-    @search = NanoApi::Search.find(params[:id])
-    render :new
-  end
-
   def create
     @search = NanoApi::Search.new(search_params)
     cookies[:search_params] = {

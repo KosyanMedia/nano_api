@@ -17,8 +17,8 @@ module NanoApi
 
       def search_instance attributes = {}
         NanoApi::Search.new(attributes).tap do |search|
-          search.reverse_update_attributes(user_location_attributes)
           search.reverse_update_attributes(cookie_params)
+          search.reverse_update_attributes(user_location_attributes)
         end
       end
 

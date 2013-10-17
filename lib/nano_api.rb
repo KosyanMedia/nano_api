@@ -1,4 +1,5 @@
 require 'active_support'
+require 'active_data'
 require 'rest_client'
 require 'nano_api/version'
 require 'nano_api/engine' if defined? Rails
@@ -23,3 +24,5 @@ module NanoApi
     end
   end
 end
+
+ActiveSupport.run_load_hooks(:nano_api)

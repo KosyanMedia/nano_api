@@ -2,19 +2,30 @@ require 'active_support/core_ext/hash'
 require 'json'
 require 'digest/md5'
 
+Dir[NanoApi::Engine.root.join(*%w(lib nano_api client *.rb))].each { |f| require f }
+
 module NanoApi
   class Client
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
-    MAPPING = { :'zh-CN' => :cn, :'en-GB' => :'en_GB', :'en-AU' => :'en_AU' }
+    MAPPING = {
+      :'zh-CN' => :cn,
+      :'en-GB' => :en_GB,
+      :'en-IE' => :en_GB,
+      :'en-AU' => :en_AU,
+      :'en-NZ' => :en_AU,
+      :'en-IN' => :en,
+      :'en-SG' => :en,
+      :'en-CA' => :en
+    }
 
     include NanoApi::Client::Search
     include NanoApi::Client::Click
     include NanoApi::Client::Places
     include NanoApi::Client::MinimalPrices
     include NanoApi::Client::Airlines
-    include NanoApi::Client::UiEvents
     include NanoApi::Client::Overmind
     include NanoApi::Client::Affiliate
+    include NanoApi::Client::WhiteLabel
 
     attr_reader :controller
     delegate :request, :session, :marker, to: :controller, allow_nil: true
@@ -29,8 +40,9 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site
-      @site ||= RestClient::Resource.new(NanoApi.config.search_server)
+    def self.site host = nil
+      host = host.presence || NanoApi.config.search_server
+      (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end
 
     def self.affiliate_marker? marker
@@ -52,46 +64,39 @@ module NanoApi
   protected
 
     def get *args
-      perform :get, *args
+      JSON.parse perform(:get, *args)
     end
 
     def post *args
-      perform :post, *args
+      JSON.parse perform(:post, *args)
     end
 
-    def get_raw path, params = {}, options = {}
-      get path, params, options.merge(parse: false)
+    def get_raw *args
+      perform(:get, *args)
     end
 
-    def post_raw path, params = {}, options = {}
-      post path, params, options.merge(parse: false)
+    def post_raw *args
+      perform(:post, *args)
     end
 
     def perform method, path, params = {}, options = {}
-      options.reverse_merge!(parse: true)
-      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
-      path += '.json'
-
       headers = {}
       if request
         params.reverse_merge!(user_ip: request.remote_ip) if request.remote_ip.present?
         headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
-        if session[:current_referer]
-          headers[:referer] = session[:current_referer][:referer]
-          headers[:x_landing_page] = session[:current_referer][:landing_page]
-          headers[:x_search_count] = session[:current_referer][:search_count]
-        end
       end
 
+      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
+
+      path += '.json'
 
       response = if method == :get
         path = [path, params.to_query].delete_if(&:blank?).join('?')
-        site[path].send(method, headers)
+        site(options[:host])[path].send(method, headers)
       else
-        site[path].send(method, params, headers)
+        site(options[:host])[path].send(method, params, headers)
       end
-      options[:parse] ? JSON.parse(response) : response
     end
 
   end

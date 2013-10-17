@@ -2,7 +2,7 @@ module NanoApi
   class Search
     unloadable
 
-    include NanoApi::Model
+    include ActiveData::Model
 
     attribute :origin_iata
     attribute :origin_name, &:origin_name_default
@@ -16,7 +16,7 @@ module NanoApi
     attribute :adults, type: Integer, in: (1..9), default: 1
     attribute :children, type: Integer, in: (0..8), default: 0
     attribute :infants, type: Integer, in: (0..5), default: 0
-    attribute :feature
+    attribute :feature # WTF????
 
     alias_method :oneway=, :one_way=
 
@@ -71,8 +71,9 @@ module NanoApi
     [:search, :cookies].each do |postfix|
       define_method "attributes_for_#{postfix}" do
         Hash[attribute_names.map do |name|
-          [name, respond_to?("#{name}_for_#{postfix}") ? send("#{name}_for_#{postfix}") : send(name)]
-        end]
+          value = respond_to?("#{name}_for_#{postfix}") ? send("#{name}_for_#{postfix}") : send(name)
+          [name, value] unless value.respond_to?(:empty?) ? value.empty? : value.nil?
+        end.compact]
       end
     end
 

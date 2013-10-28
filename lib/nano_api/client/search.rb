@@ -14,7 +14,9 @@ module NanoApi::Client::Search
       result
     end
 
-    post('searches', {
+    url = options[:realtime] ? 'searches_rt/searches' : 'searches'
+
+    post(url, {
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
       search: {

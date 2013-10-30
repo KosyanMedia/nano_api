@@ -7,6 +7,9 @@ module NanoApi
 
     def forward_json json, status = :ok
       response.content_type = Mime::JSON
+      if defined?(Rollbar) && status != :ok
+        Rollbar.report_exception NanoApi::Client::RequestError.new(json), status: status
+      end
       render text: json, status: status
     end
   end

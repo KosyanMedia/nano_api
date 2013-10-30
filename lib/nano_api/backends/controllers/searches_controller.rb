@@ -15,8 +15,10 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     search_result = @search.search
 
     if search_result.present?
-      search_id = get_search_id(search_result)
-      response.headers['X-Search-Id'] = search_id if search_result.is_a?(String)
+      if search_result.is_a?(String)
+        search_id = get_search_id(search_result)
+        response.headers['X-Search-Id'] = search_id
+      end
       forward_json(*search_result)
     else
       render json: {}, status: :internal_server_error

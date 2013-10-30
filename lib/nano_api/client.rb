@@ -6,6 +6,8 @@ Dir[NanoApi::Engine.root.join(*%w(lib nano_api client *.rb))].each { |f| require
 
 module NanoApi
   class Client
+    class RequestError < StandardError; end
+
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
     MAPPING = {
       :'zh-CN' => :cn,

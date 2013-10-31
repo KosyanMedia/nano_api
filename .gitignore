@@ -6,6 +6,7 @@ vendor/bundle
 .idea
 log/*.log
 pkg/
+Gemfile.lock
 spec/dummy/db/*.sqlite3
 spec/dummy/log/*.log
 tmp/

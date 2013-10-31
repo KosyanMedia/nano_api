@@ -21,6 +21,7 @@ module NanoApi
     autoload_under 'controllers' do
       autoload :SearchesController
       autoload :ClicksController
+      autoload :ApplicationController
     end
   end
 end

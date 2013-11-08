@@ -82,6 +82,7 @@ module NanoApi
       if request
         params.reverse_merge!(user_ip: request.remote_ip) if request.remote_ip.present?
         headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
+        headers[:x_search_host] = request.referer
         if session[:current_referer]
           headers[:referer] = session[:current_referer][:referer]
           headers[:x_landing_page] = session[:current_referer][:landing_page]

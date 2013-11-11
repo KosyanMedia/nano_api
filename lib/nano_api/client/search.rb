@@ -31,7 +31,7 @@ module NanoApi
           enable_api_auth: true,
           locale: extract_locale(params),
           search: search_params
-        }, options.reverse_merge!(host: true))
+        }, options.reverse_merge!(host: :search_server))
       rescue RestClient::ResourceNotFound,
         RestClient::BadRequest,
         RestClient::Forbidden,

@@ -6,6 +6,7 @@ module NanoApi
   class Client
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
     MAPPING = { :'zh-CN' => :cn, :'en-GB' => :'en_GB', :'en-AU' => :'en_AU' }
+    DEFAULT_HOST_KEY = :nano_server
 
     include NanoApi::Client::Search
     include NanoApi::Client::Click
@@ -29,12 +30,15 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site(search_host = false)
+    def self.site search_host = false, host_key = nil
       host = if search_host || !NanoApi.config.nano_server
         NanoApi.config.search_server
       else
-        NanoApi.config.nano_server
+        host_key ||= DEFAULT_HOST_KEY
+
+        NanoApi.config.send(host_key) || NanoApi.config.send(DEFAULT_HOST_KEY)
       end
+
       RestClient::Resource.new(host)
     end
 
@@ -94,9 +98,9 @@ module NanoApi
 
       response = if method == :get
         path = [path, params.to_query].delete_if(&:blank?).join('?')
-        site(options[:search_host])[path].send(method, headers)
+        site(options[:search_host], options[:host_key])[path].send(method, headers)
       else
-        site(options[:search_host])[path].send(method, params, headers)
+        site(options[:search_host], options[:host_key])[path].send(method, params, headers)
       end
       options[:parse] ? JSON.parse(response) : response
     end

@@ -18,6 +18,31 @@ describe NanoApi::Client do
     end
   end
 
+  describe '.site' do
+    let(:config){OpenStruct.new({
+      nano_server: :nano_server,
+      search_server: :search_server,
+      travelpayouts_server: :travelpayouts_server
+    })}
+
+    before do
+      NanoApi.stub(:config).and_return(config)
+    end
+
+    specify{NanoApi::Client.site.url.should == :nano_server}
+    specify{NanoApi::Client.site(true).url.should == :search_server}
+    specify{NanoApi::Client.site(false, :travelpayouts_server).url.should == :travelpayouts_server}
+    specify{NanoApi::Client.site(false, :not_exists).url.should == :nano_server}
+
+    context 'without nano_server in config' do
+      let(:config){OpenStruct.new({
+        search_server: :search_server,
+      })}
+
+      specify{NanoApi::Client.site.url.should == :search_server}
+    end
+  end
+
   describe '.signature' do
     specify {NanoApi::Client.signature(12345).should == Digest::MD5.hexdigest("#{NanoApi.config.api_token}:12345")}
     specify {NanoApi::Client.signature(12345, 'hello', 'world').should == Digest::MD5.hexdigest("#{NanoApi.config.api_token}:12345:hello:world")}

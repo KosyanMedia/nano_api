@@ -64,8 +64,8 @@ describe NanoApi::Client do
 
     specify{NanoApi::Client.site.url.should == :nano_server}
     specify{NanoApi::Client.site(true).url.should == :search_server}
-    specify{NanoApi::Client.site(false, :travelpayouts_server).url.should == :travelpayouts_server}
-    specify{NanoApi::Client.site(false, :not_exists).url.should == :nano_server}
+    specify{NanoApi::Client.site(:travelpayouts_server).url.should == :travelpayouts_server}
+    specify{NanoApi::Client.site(:not_exists).url.should == :nano_server}
 
     context 'without nano_server in config' do
       let(:config){OpenStruct.new({

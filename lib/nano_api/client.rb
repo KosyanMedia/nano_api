@@ -46,15 +46,8 @@ module NanoApi
 
     def self.site(host = nil)
       unless host.is_a?(String)
-        host = if host && host.in?([true, false])
-          :search_server
-        else
-          host || DEFAULT_HOST_KEY
-        end
-
-        host = NanoApi.config.send(host) || NanoApi.config.send(DEFAULT_HOST_KEY) || NanoApi.config.search_server
+        host = host && NanoApi.config.send(host) || NanoApi.config.nano_server || NanoApi.config.search_server
       end
-
       (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end
 

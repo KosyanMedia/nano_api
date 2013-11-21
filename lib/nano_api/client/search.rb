@@ -26,7 +26,7 @@ module NanoApi
             marker: marker,
             params_attributes: allowed_params
           }
-        }, options.reverse_merge!(host: true))
+        }, options.reverse_merge!(host: :search_server))
       rescue RestClient::ResourceNotFound,
         RestClient::BadRequest,
         RestClient::Forbidden,

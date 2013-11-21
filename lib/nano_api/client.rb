@@ -9,6 +9,7 @@ module NanoApi
     class RequestError < StandardError; end
 
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
+
     MAPPING = {
       :'zh-CN' => :cn,
       :'en-GB' => :en_GB,
@@ -19,6 +20,7 @@ module NanoApi
       :'en-SG' => :en,
       :'en-CA' => :en
     }
+    DEFAULT_HOST_KEY = :nano_server
 
     include NanoApi::Client::Search
     include NanoApi::Client::Click
@@ -42,13 +44,9 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site(host = false)
+    def self.site(host = nil)
       unless host.is_a?(String)
-        host = if host || !NanoApi.config.nano_server
-          NanoApi.config.search_server
-        else
-          NanoApi.config.nano_server
-        end
+        host = host && NanoApi.config.send(host) || NanoApi.config.nano_server || NanoApi.config.search_server
       end
       (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end

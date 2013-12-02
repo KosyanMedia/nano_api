@@ -16,16 +16,18 @@ module NanoApi::Client::Search
 
     url = options[:realtime] ? 'searches_rt/searches' : 'searches'
 
+    search_params = {
+      host: request.try(:host),
+      user_ip: request.try(:remote_ip),
+      marker: marker,
+      params_attributes: allowed_params,
+    }
+    search_params[:know_english] = options[:know_english] if options[:know_english]
+
     post(url, {
       signature: api_client_signature(marker, allowed_params),
       enable_api_auth: true,
-      search: {
-        host: request.try(:host),
-        user_ip: request.try(:remote_ip),
-        marker: marker,
-        params_attributes: allowed_params,
-        know_english: options[:know_english]
-      }
+      search: search_params
     }, options.reverse_merge!(parse: false, search_host: true))
   rescue RestClient::ResourceNotFound,
     RestClient::BadRequest,

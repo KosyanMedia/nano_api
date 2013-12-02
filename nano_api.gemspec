@@ -23,7 +23,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rspec-rails'
   s.add_development_dependency 'jasmine'
   s.add_development_dependency 'capybara'
-  s.add_development_dependency 'webmock'
+  s.add_development_dependency 'webmock', '~> 1.13.0' # >= 1.14.0 fail the specs.
   s.add_development_dependency 'fabrication'
   s.add_development_dependency 'forgery'
 

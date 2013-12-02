@@ -4,7 +4,7 @@ describe NanoApi::Client do
   let(:rest_client) { NanoApi::Client.send(:site) }
   let(:fake) { %r{^#{URI.join(NanoApi.config.search_server, path)}} }
   let(:controller) { double(marker: 'test', session: {}, request:
-    double(host: 'test.com', env: {}, remote_ip: '127.1.1.1')) }
+    double(host: 'test.com', env: {}, remote_ip: '127.1.1.1', referer: '')) }
   subject { NanoApi::Client.new controller }
 
 

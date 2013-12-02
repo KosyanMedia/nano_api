@@ -72,7 +72,8 @@ describe NanoApi::Client do
     }}
 
     let(:controller) do
-      double(marker: '12345', session: {}, request: double(host: 'test.com', env: {}, remote_ip: '127.1.1.1'))
+      double(marker: '12345', session: {},
+        request: double(host: 'test.com', env: {}, remote_ip: '127.1.1.1', referer: ''))
     end
 
     subject { NanoApi::Client.new controller }

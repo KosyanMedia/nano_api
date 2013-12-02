@@ -16,7 +16,7 @@ module NanoApi
           result
         end
 
-        url = options[:realtime] ? 'searches_rt/searches' : 'searches_jetradar'
+        url = NanoApi.config.search_path || (options[:realtime] ? 'searches_rt/searches' : 'searches')
 
         search_params = {
           host: params[:host].presence || request.try(:host),

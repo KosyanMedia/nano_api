@@ -11,6 +11,14 @@ describe NanoApi::Client do
   describe '.search' do
     let(:path){'searches.json'}
 
+    context 'with search_path config defined' do
+      before { NanoApi.config.stub(:search_path).and_return('searches_jetradar') }
+      specify do
+        subject.should_receive(:post_raw).with 'searches_jetradar', anything, anything
+        subject.search({})
+      end
+    end
+
     context 'normal response' do
       before do
         stub_http_request(:post, fake).to_return(body: '{tickets: [{test: 1}, {test: 2}]}')

@@ -2,34 +2,29 @@ require 'spec_helper'
 
 describe NanoApi::Client do
   describe '#perform' do
-    subject(:client) { NanoApi::Client.new(double(:controller, request: request)) }
-    let(:request){double(:request, remote_ip: '127.0.0.1', env: {'HTTP_ACCEPT_LANGUAGE' => 'lang'})}
+    subject(:client) { NanoApi::Client.new(double(:controller, request: request, session: {})) }
+    let(:request) { double(:request, remote_ip: '127.0.0.1', env: {'HTTP_ACCEPT_LANGUAGE' => 'lang'}, referer: '') }
+
+    before do
+      stub_request(:get, url).
+        with(headers: {'Accept-Language' => 'lang'}).to_return(status: 200, body: 'answer')
+    end
 
     context do
-      before { stub_request(:get, "http://test.te/path.json?foo=bar&locale=en&user_ip=127.0.0.1").
-        with(headers: {'Accept-Language' => 'lang'}).
-        to_return(:status => 200, :body => 'answer') }
+      let(:url) { "http://test.te/path.json?foo=bar&locale=en&user_ip=127.0.0.1" }
       specify { client.send(:perform, :get, 'path', { foo: 'bar' }).should == 'answer' }
     end
 
     context do
-      before { stub_request(:get, "http://another.host/path.json?foo=bar&locale=en&user_ip=127.0.0.1").
-        with(headers: {'Accept-Language' => 'lang'}).
-        to_return(:status => 200, :body => 'answer') }
+      let(:url) { "http://another.host/path.json?foo=bar&locale=en&user_ip=127.0.0.1" }
       specify { client.send(:perform, :get, 'path', { foo: 'bar' }, { host: 'another.host' }).should == 'answer' }
     end
 
     context do
-      before do
-        stub_request(:get, "http://test.te/path.json?foo=bar&locale=de&user_ip=127.0.0.3").
-          with(headers: {'Accept-Language' => 'lang'}).
-          to_return(:status => 200, :body => 'answer')
-      end
+      let(:url) { "http://test.te/path.json?foo=bar&locale=de&user_ip=127.0.0.3" }
 
       specify do
-        client.send(:perform, :get, 'path',
-          {foo: 'bar', locale: 'de', user_ip: '127.0.0.3'}
-        ).should == 'answer'
+        client.send(:perform, :get, 'path', {foo: 'bar', locale: 'de', user_ip: '127.0.0.3'}).should == 'answer'
       end
     end
   end

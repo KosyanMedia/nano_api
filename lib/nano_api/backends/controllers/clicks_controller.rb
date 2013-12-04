@@ -29,7 +29,7 @@ private
 
   def click_params
     NanoApi.client.click(params[:search_id], params[:id],
-      {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value]})
+      {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]})
   end
 
   def link_params

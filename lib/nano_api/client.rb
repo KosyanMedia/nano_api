@@ -13,7 +13,7 @@ module NanoApi
     MAPPING = {
       :'zh-CN' => :cn,
       :'en-GB' => :en_GB,
-      :'en-IE' => :en_GB,
+      :'en-IE' => :en_IE,
       :'en-AU' => :en_AU,
       :'en-NZ' => :en_AU,
       :'en-IN' => :en,

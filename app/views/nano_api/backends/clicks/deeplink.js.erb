@@ -1,6 +1,10 @@
 <% if 'get' == @deeplink_params[:method] and @deeplink_params[:params].blank? %>
-  window.location.href = '<%= raw @deeplink_params[:url] %>';
+	setTimeout(function(){
+  	window.location.href = '<%= raw @deeplink_params[:url] %>';
+	}, timeout);
 <% else %>
-  document.write('<%= j render 'form', form: @deeplink_params %>');
-  document.getElementById('nano_api_click_form').submit();
+	setTimeout(function(){
+		document.write('<%= j render 'form', form: @deeplink_params %>');
+		document.getElementById('nano_api_click_form').submit();
+	}, timeout);
 <% end %>

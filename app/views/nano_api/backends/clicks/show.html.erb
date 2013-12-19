@@ -1,12 +1,16 @@
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">
-    window.location.href = '<%= raw @click_params[:url] %>';
+		setTimeout(function(){
+			window.location.href = '<%= raw @click_params[:url] %>';
+		}, timeout);
   </script>
   <%= render 'counter' %>
 <% else %>
   <%= render 'form', form: @click_params %>
 
   <script type="text/javascript">
-    document.getElementById('nano_api_click_form').submit();
+		setTimeout(function(){
+    	document.getElementById('nano_api_click_form').submit();
+		}, timeout);
   </script>
 <% end %>

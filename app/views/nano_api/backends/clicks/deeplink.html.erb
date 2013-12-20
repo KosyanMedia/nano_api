@@ -1,16 +1,24 @@
 <% if 'get' == @deeplink_params[:method] and @deeplink_params[:params].blank? %>
   <script type="text/javascript">
-		setTimeout(function(){
-			window.location.href = '<%= raw @deeplink_params[:url] %>';
-		}, timeout);
+		var redirect = function(timeout){
+			setTimeout(function(){
+				window.location.href = '<%= raw @deeplink_params[:url] %>';
+			}, timeout);
+		}
   </script>
   <%= render 'counter' %>
 <% else %>
   <%= render 'form', form: @deeplink_params %>
 
   <script type="text/javascript">
-		setTimeout(function(){
-    	document.getElementById('nano_api_click_form').submit();
-		}, timeout);
+		var redirect = function(timeout){
+			setTimeout(function(){
+				document.getElementById('nano_api_click_form').submit();
+			}, timeout);
+		}
   </script>
 <% end %>
+
+<script type="text/javascript">
+	redirect(window.timeout || 0)
+</script>

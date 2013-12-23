@@ -1,8 +1,8 @@
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">
-		var redirect = function(timeout){
+		var redirect = function(timeout, wrap_url){
 			setTimeout(function(){
-				window.location.href = '<%= raw @click_params[:url] %>';
+				window.location.href = wrap_url + '<%= raw @click_params[:url] %>';
 			}, timeout);
 		}
   </script>
@@ -20,5 +20,5 @@
 <% end %>
 
 <script type="text/javascript">
-	redirect(window.timeout || 0)
+	redirect(window.timeout || 0, window.wrapUrl || '');
 </script>

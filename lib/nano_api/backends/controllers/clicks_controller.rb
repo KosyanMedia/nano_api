@@ -32,7 +32,7 @@ private
       {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]}
     )
 
-    result[:method].downcase!
+    result[:method].downcase! if result.present?
     result
   end
 

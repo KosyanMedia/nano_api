@@ -8,7 +8,7 @@ describe NanoApi::ClicksController do
       it 'should render from with params, received from api' do
         NanoApi::Client.any_instance.should_receive(:click).with('111', '123', hash_including(unique: '1')).and_return(
           url: 'http://test.com',
-          http_method: 'post',
+          method: 'post',
           params: {test: 'test_value'}
         )
         get :show, use_route: :nano_api, search_id: 111, id: 123
@@ -41,7 +41,7 @@ describe NanoApi::ClicksController do
         with('searches/111/order_urls/123', hash_including(marker: 'direct'), {search_host: false}).
         and_return(
           url: 'http://test.com',
-          http_method: 'post',
+          method: 'post',
           params: {test: 'test_value'}
         )
       get :show, use_route: :nano_api, search_id: 111, id: 123
@@ -53,7 +53,7 @@ describe NanoApi::ClicksController do
       NanoApi::Client.any_instance.should_receive(:get).
         with('airline_logo/123', hash_including(marker: 'direct'), {json: false}).and_return(
           url: 'http://test.com',
-          http_method: 'get',
+          method: 'get',
           params: {test: 'test_value'}
         )
       get :link, use_route: :nano_api, search_id: 111, id: 123
@@ -65,7 +65,7 @@ describe NanoApi::ClicksController do
       NanoApi::Client.any_instance.should_receive(:get).
         with('airline_deeplinks/123', hash_including(marker: 'direct')).and_return(
           url: 'http://test.com',
-          http_method: 'get',
+          method: 'get',
           params: {test: 'test_value'}
         )
       get :deeplink, use_route: :nano_api, search_id: 111, id: 123

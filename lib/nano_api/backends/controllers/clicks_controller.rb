@@ -28,8 +28,12 @@ class NanoApi::Backends::ClicksController < NanoApi::ApplicationController
 private
 
   def click_params
-    NanoApi.client.click(params[:search_id], params[:id],
-      {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]})
+    result = NanoApi.client.click(params[:search_id], params[:id],
+      {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]}
+    )
+
+    result[:method] = result[:method].downcase
+    result
   end
 
   def link_params
@@ -38,8 +42,14 @@ private
   end
 
   def deeplink_params
-    NanoApi.client.deeplink(params[:search_id], params[:id],
-      params.except(:id, :search_id).merge(:unique => _uniq_click?('l')))
+    result = NanoApi.client.deeplink(
+      params[:search_id],
+      params[:id],
+      params.except(:id, :search_id).merge(:unique => _uniq_click?('l'))
+    )
+
+    result[:method] = result[:method].downcase
+    result
   end
 
   def _uniq_click? scope, gate_id = _gate_id

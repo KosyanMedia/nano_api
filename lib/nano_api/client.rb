@@ -90,7 +90,9 @@ module NanoApi
         headers[:cookie] = request.env.fetch('HTTP_COOKIE', '')
         headers['X-Real-Ip'] = request.remote_ip || ''
         headers['X-Search-Host'] = request.host || ''
-        headers['X-Search-Url'] = request.url || ''
+        if request.methods.include?(:url)
+          headers['X-Search-Url'] = request.url || ''
+        end
         headers['X-Referer'] = request.referer || ''
 
         if session[:current_referer]

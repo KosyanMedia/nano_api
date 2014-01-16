@@ -3,7 +3,9 @@ require 'spec_helper'
 describe NanoApi::Client do
   describe '#perform' do
     subject(:client) { NanoApi::Client.new(double(:controller, request: request, session: {})) }
-    let(:request) { double(:request, remote_ip: '127.0.0.1', env: {'HTTP_ACCEPT_LANGUAGE' => 'lang'}, referer: '') }
+    let(:request) do
+      double(:request, remote_ip: '127.0.0.1', env: {'HTTP_ACCEPT_LANGUAGE' => 'lang'}, referer: '', host: '')
+    end
 
     before do
       stub_request(:get, url).

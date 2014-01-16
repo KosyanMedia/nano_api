@@ -88,8 +88,11 @@ module NanoApi
         headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
         headers[:user_agent] = request.env['HTTP_USER_AGENT']
         headers[:cookie] = request.env.fetch('HTTP_COOKIE', '')
-        headers['X-Real-Ip'] = request.try(:remote_ip) || ''
-        headers['X-Search-Host'] = URI.parse(request.referer).host rescue request.env.fetch('HTTP_HOST', '')
+        headers['X-Real-Ip'] = request.remote_ip || ''
+        headers['X-Search-Host'] = request.host || ''
+        headers['X-Search-Url'] = request.url || ''
+        headers['X-Referer'] = request.referer || ''
+
         if session[:current_referer]
           headers[:referer] = session[:current_referer][:referer]
           headers[:x_landing_page] = session[:current_referer][:landing_page]

@@ -8,7 +8,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def create
     @search = NanoApi::Search.new(search_params)
     cookies[:search_params] = {
-      value: search_params_for_cookies(@search.search_params),
+      value: { params_attributes: @search.params.to_json },
       domain: default_nano_domain
     }
 
@@ -32,12 +32,8 @@ private
   def search_options
     {
       know_english: cookies[:know_english] == 'true',
-      realtime: params.include?('realtime')
+      chain: params[:chain]
     }
-  end
-
-  def search_params_for_cookies search_params
-    search_params.to_json
   end
 
   def search_params

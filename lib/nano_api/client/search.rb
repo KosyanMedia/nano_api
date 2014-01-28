@@ -1,45 +1,29 @@
 module NanoApi
   class Client
     module Search
-      SEARCH_PARAMS_KEYS = %w[
-        origin_iata origin_name destination_iata destination_name
-        depart_date return_date
-        adults children infants
-        trip_class range
-      ].map(&:to_sym)
+
+      MAPPING = {
+        :'zh-CN' => :cn,
+        :'en-GB' => :en_GB,
+        :'en-IE' => :en_IE,
+        :'en-AU' => :en_AU,
+        :'en-NZ' => :en_AU,
+        :'en-IN' => :en,
+        :'en-SG' => :en,
+        :'en-CA' => :en
+      }
 
       def search params, options = {}
-        params.symbolize_keys!
-        marker = params[:marker].presence || api_client_marker(controller.try(:marker))
-        allowed_params = params.slice(*SEARCH_PARAMS_KEYS).inject({}) do |result, (key, value)|
-          result[key] = value if value.present?
-          result
-        end
-
-        url = NanoApi.config.search_path || (options[:realtime] ? 'searches_rt/searches' : 'searches')
-
-        search_params = {
-          host: params[:host].presence || request.try(:host),
-          user_ip: params[:user_ip].presence || request.try(:remote_ip),
-          marker: marker,
-          params_attributes: allowed_params,
-        }
-        search_params[:know_english] = options[:know_english] if options[:know_english]
-
-        post_raw(url, {
-          signature: api_client_signature(marker, allowed_params),
-          enable_api_auth: true,
-          locale: extract_locale(params),
-          search: search_params
-        }, options.reverse_merge!(host: :search_server))
-      rescue RestClient::ResourceNotFound,
-        RestClient::BadRequest,
-        RestClient::Forbidden,
-        RestClient::ServiceUnavailable,
-        RestClient::MethodNotAllowed => exception
-          [exception.http_body, exception.http_code]
-      rescue RestClient::InternalServerError
-        nil
+        path = NanoApi.config.search_path + options[:chain] + (Settings.chain_suffix || '')
+        search_params = params.symbolize_keys.merge(
+          marker: controller.try(:marker),
+          user_ip: request.remote_ip,
+          locale: MAPPING[I18n.locale] || I18n.locale,
+          host: request.host
+        )
+        post_raw(path, search_params, options.reverse_merge!(host: :search_server))
+      rescue RestClient::Exception => exception
+        [exception.http_body, exception.http_code]
       end
 
       def search_params id
@@ -53,17 +37,6 @@ module NanoApi
       end
 
     private
-      def extract_locale params
-        locale = params[:locale].presence || I18n.locale
-        NanoApi::Client::MAPPING[locale] || locale
-      end
-
-      def api_client_signature marker, params
-        Digest::MD5.hexdigest(
-          [NanoApi.config.api_token, marker, *params.values_at(*params.keys.sort)].join(?:)
-        )
-      end
-
       def api_client_marker additional_marker
         result = [additional_marker]
         result.unshift(NanoApi.config.marker) if NanoApi.config.marker.present?

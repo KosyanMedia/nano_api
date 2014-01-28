@@ -2,87 +2,91 @@ module NanoApi
   class Search
     include ActiveData::Model
 
-    attribute :origin_iata
-    attribute :origin_name, &:origin_name_default
-    attribute :destination_iata
-    attribute :destination_name, &:destination_name_default
-    attribute(:depart_date, type: Date){Date.current + 2.weeks}
-    attribute(:return_date, type: Date){Date.current + 3.weeks}
+    DEFAULT_DEPARTURE_OFFSET = 2.weeks
+    DEFAULT_RETURN_OFFSET = 3.weeks
+
     attribute :range, type: Boolean, default: false
-    attribute :one_way, type: Boolean, default: false
-    attribute :trip_class, type: Integer, in: (0..2), default: 0
-    attribute :adults, type: Integer, in: (1..9), default: 1
-    attribute :children, type: Integer, in: (0..8), default: 0
-    attribute :infants, type: Integer, in: (0..5), default: 0
+    attribute :trip_class, type: Integer, in: [0, 1], default: 0
 
-    alias_method :oneway=, :one_way=
-    alias_method :oneway, :one_way
+    embeds_many :segments, class: NanoApi::Segment
+    embeds_one :passengers, class: NanoApi::Passengers
 
-    def passengers
-      [adults, children, infants].sum
+    accepts_nested_attributes_for :segments, :passengers
+
+    delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
+
+    def one_way= value
+      self.segments = [segments.first] if value.present?
     end
 
-    [:origin, :destination].each do |name|
-      define_method name do
-        {}.tap do |place|
-          place.merge!(:name => send("#{name}_name")) if send("#{name}_name").present?
-          place.merge!(:iata => send("#{name}_iata")) if send("#{name}_iata").present?
-        end
+    def one_way
+      segments.count == 1
+    end
+
+    def origin= value
+      segments[0].origin = value
+      segments[1].destination = value if segments[1]
+    end
+
+    def destination= value
+      segments[0].destination = value
+      segments[1].origin = value if segments[1]
+    end
+
+    [:iata=, :name=, :type=].each do |field|
+      define_method "origin_#{field}" do |value|
+        segments[0].origin.send(field, value)
+        segments[1].destination.send(field, value) if segments[1]
       end
 
-      define_method "#{name}=" do |data|
-        if data.is_a?(Hash)
-          data.symbolize_keys! unless data.is_a?(HashWithIndifferentAccess)
-          send "#{name}_name=", data[:name] if !send("#{name}_name?") && data.key?(:name)
-          send "#{name}_iata=", data[:iata] if !send("#{name}_iata?") && data.key?(:iata)
-        else
-          send "#{name}_name=", data
-        end
-      end
-
-      define_method "#{name}_iata=" do |value|
-        variable = "@#{name}_name_default"
-        remove_instance_variable variable if instance_variable_defined? variable
-        write_attribute "#{name}_iata", value
-      end
-
-      define_method "#{name}_name_default" do
-        variable = "@#{name}_name_default"
-        if instance_variable_defined?(variable)
-          instance_variable_get(variable).presence || send("#{name}_iata")
-        else
-          instance_variable_set(variable,
-            JSON.parse(NanoApi.client.place(send("#{name}_iata"))).first.try(:[], 'name'))
-          send("#{name}_name_default")
-        end
+      define_method "destination_#{field}" do |value|
+        segments[0].destination.send(field, value)
+        segments[1].origin.send(field, value) if segments[1]
       end
     end
 
-    def return_date_for_search
-      return_date unless one_way
+    def depart_date
+      segments[0].date
+    end
+
+    def depart_date= value
+      segments[0].date = value
+    end
+
+    def return_date
+      segments[1].try(:date)
+    end
+
+    def return_date= value
+      segments[1].date = value if segments[1]
     end
 
     def search options = {}
-      NanoApi.client.search(attributes_for_search, options)
+      NanoApi.client.search(search_params, options)
     end
 
-    [:search, :cookies].each do |postfix|
-      define_method "attributes_for_#{postfix}" do
-        Hash[attribute_names.map do |name|
-          value = respond_to?("#{name}_for_#{postfix}") ? send("#{name}_for_#{postfix}") : send(name)
-          [name, value] unless value.respond_to?(:empty?) ? value.empty? : value.nil?
-        end.compact]
-      end
+    def params
+      attributes.merge(
+        segments: segments.map(&:params),
+        passengers: passengers.attributes
+      )
     end
 
     def search_params
-      {
-        :params_attributes =>
-          Hash[['origin', 'destination', 'depart_date', 'return_date', 'range',
-          'adults', 'children', 'infants', 'trip_class', 'one_way', 'oneway'].map do |name|
-            [name, send(name)]
-          end]
-      }
+      result = params.merge(trip_class: params[:trip_class] == 0 ? 'Y' : 'C')
+      result[:segments].each do |segment|
+        [:origin, :destination].each do |place|
+          segment[place] = segment[place][:iata]
+        end
+      end
+      result
+    end
+
+    def initial_params
+      params.merge(
+        return_date: return_date,
+        one_way: one_way,
+      )
     end
 
     def self.find id
@@ -91,5 +95,15 @@ module NanoApi
       new(attributes)
     end
 
+    def initialize_with_defaults attributes = {}
+      self.passengers = NanoApi::Passengers.new
+      self.segments = [
+        NanoApi::Segment.new(date: Date.current + DEFAULT_DEPARTURE_OFFSET),
+        NanoApi::Segment.new(date: Date.current + DEFAULT_RETURN_OFFSET)
+      ]
+      initialize_without_defaults(attributes)
+    end
+
+    alias_method_chain :initialize, :defaults
   end
 end

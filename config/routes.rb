@@ -5,6 +5,7 @@ NanoApi::Engine.routes.draw do
     end
   end
   get '/searches/:id', to: 'searches#new', as: :search
+  post '/adaptors/chains/:chain' => 'searches#create'
 
   resources :clicks, only: :new
   resources :places, only: :index

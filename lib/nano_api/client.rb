@@ -10,16 +10,6 @@ module NanoApi
 
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
 
-    MAPPING = {
-      :'zh-CN' => :cn,
-      :'en-GB' => :en_GB,
-      :'en-IE' => :en_IE,
-      :'en-AU' => :en_AU,
-      :'en-NZ' => :en_AU,
-      :'en-IN' => :en,
-      :'en-SG' => :en,
-      :'en-CA' => :en
-    }
     DEFAULT_HOST_KEY = :nano_server
 
     include NanoApi::Client::Search
@@ -86,36 +76,26 @@ module NanoApi
     end
 
     def perform method, path, params = {}, options = {}
-      headers = {}
-      if request
-        params.reverse_merge!(user_ip: request.try(:remote_ip))
-        headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
-        headers[:user_agent] = request.env['HTTP_USER_AGENT']
-        headers[:cookie] = request.env.fetch('HTTP_COOKIE', '')
-        headers['X-Real-Ip'] = request.remote_ip || ''
-        headers['X-Search-Host'] = request.host || ''
-        if request.methods.include?(:url)
-          headers['X-Search-Url'] = request.url || ''
-        end
-        headers['X-Referer'] = request.referer || ''
-
-        if session[:current_referer]
-          headers[:referer] = session[:current_referer][:referer]
-          headers[:x_landing_page] = session[:current_referer][:landing_page]
-          headers[:x_search_count] = session[:current_referer][:search_count]
-        end
-      end
-
-      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
 
-      path += '.json'
+      headers = if request
+        Rack::Proxy.new.send(:extract_http_request_headers, request.env).except('HOST').merge(
+          x_referer: request.referer || '',
+          x_search_host: request.host || '',
+          x_search_url: request.url || '',
+          x_real_ip: request.ip || ''
+        )
+      else
+        {}
+      end
+
+      headers[:content_type] = :json
 
       if method == :get
         path = [path, params.to_query].delete_if(&:blank?).join('?')
         site(options[:host])[path].send(method, headers)
       else
-        site(options[:host])[path].send(method, params, headers)
+        site(options[:host])[path].send(method, params.to_json, headers)
       end
     end
   end

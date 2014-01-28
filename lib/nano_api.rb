@@ -1,5 +1,6 @@
 require 'active_support'
 require 'active_data'
+require 'rack-proxy'
 require 'rest_client'
 require 'nano_api/version'
 require 'nano_api/engine' if defined? Rails

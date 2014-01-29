@@ -79,7 +79,7 @@ module NanoApi
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
 
       headers = if request
-        Rack::Proxy.new.send(:extract_http_request_headers, request.env).except('HOST').merge(
+        Rack::Proxy.extract_http_request_headers(request.env).except('HOST').merge(
           x_referer: request.referer || '',
           x_search_host: request.host || '',
           x_search_url: request.url || '',

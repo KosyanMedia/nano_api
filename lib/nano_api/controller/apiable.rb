@@ -23,9 +23,7 @@ module NanoApi
       end
 
       def cookie_params
-        JSON.parse(cookies[:search_params].presence)['params_attributes'].slice(
-          'origin', 'destination'
-        ) rescue {}
+        JSON.parse(cookies[:search_params].presence) rescue {}
       end
 
     end

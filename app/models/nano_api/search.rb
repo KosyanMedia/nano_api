@@ -54,7 +54,7 @@ module NanoApi
     end
 
     def return_date
-      segments[1].try(:date)
+      segments[1].try(:date) || segments[0].date
     end
 
     def return_date= value

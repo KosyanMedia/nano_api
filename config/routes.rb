@@ -18,4 +18,7 @@ NanoApi::Engine.routes.draw do
   get '/nearest_cities_prices' => 'minimal_prices#nearest', as: :nearest_cities_prices
   match '/latest_prices' => 'minimal_prices#latest_prices', via: [:get, :post]
   get '/estimated_search_duration' => 'gate_meta#search_duration', as: :estimated_search_duration
+
+  get '/searches_results' => 'searches#pick', as: :searches_pick
+  get '/searches_mirror_results' => 'searches#get_mirror'
 end

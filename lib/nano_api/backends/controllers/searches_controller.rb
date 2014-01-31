@@ -1,6 +1,15 @@
 class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   helper_method :show_hotels?, :show_hotels_type
 
+  def pick
+    answer = Net::HTTP.get(URI("#{NanoApi.config.search_server}/searches_results?uuid=#{params[:uuid]}"))
+    render json:  (JSON.parse(answer) rescue answer)
+  end
+
+  def get_mirror
+		render json:  JSON.parse(Net::HTTP.get(URI("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}")))
+	end
+
   def new
     @search = search_instance search_params
   end
@@ -8,7 +17,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def create
     @search = NanoApi::Search.new(search_params)
     cookies[:search_params] = {
-      value: { params_attributes: @search.params.to_json },
+      value: @search.params.to_json,
       domain: default_nano_domain
     }
 

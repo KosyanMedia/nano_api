@@ -7,6 +7,7 @@ module NanoApi
 
     attribute :range, type: Boolean, default: false
     attribute :trip_class, type: Integer, in: [0, 1], default: 0
+    attribute :with_request, type: Boolean, default: false
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -16,7 +17,7 @@ module NanoApi
     delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
 
     def one_way= value
-      self.segments = [segments.first] if value.present?
+      self.segments = [segments.first] if value.present? && value != '0'
     end
 
     def one_way
@@ -66,9 +67,9 @@ module NanoApi
     end
 
     def params
-      attributes.merge(
+      present_attributes.merge(
         segments: segments.map(&:params),
-        passengers: passengers.attributes
+        passengers: passengers.present_attributes
       )
     end
 
@@ -76,7 +77,10 @@ module NanoApi
       result = params.merge(trip_class: params[:trip_class] == 0 ? 'Y' : 'C')
       result[:segments].each do |segment|
         [:origin, :destination].each do |place|
-          segment[place] = segment[place][:iata]
+          segment.merge!(
+            place => segment[place][:iata],
+            :"#{place}_name" => segment[place][:name] # Temporarily until there is the autocomplete validation.
+          )
         end
       end
       result

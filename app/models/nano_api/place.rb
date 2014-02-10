@@ -5,6 +5,6 @@ module NanoApi
     attribute :iata
     attribute :name
     attribute :type
-    attribute :city_name
+    attribute :city
   end
 end

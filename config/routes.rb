@@ -1,10 +1,9 @@
 NanoApi::Engine.routes.draw do
-  resources :searches, only: [:new, :create] do
+  resources :searches, only: [:new, :create, :show] do
     resources :clicks, only: :show do
       get :link, :deeplink, on: :member
     end
   end
-  get '/searches/:id', to: 'searches#new', as: :search
   post '/adaptors/chains/:chain' => 'searches#create'
 
   resources :clicks, only: :new

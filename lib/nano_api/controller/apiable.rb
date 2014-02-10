@@ -16,10 +16,26 @@ module NanoApi
       end
 
       def search_instance attributes = {}
-        NanoApi::Search.new(attributes).tap do |search|
+        search = NanoApi::Search.new(attributes).tap do |search|
           search.reverse_update_attributes(cookie_params)
           search.reverse_update_attributes(user_location_attributes)
         end
+        postprocess_search(search)
+      end
+
+      def postprocess_search(search)
+        places = search.segments.flat_map { |segment| segment.params.values_at(:origin, :destination) }
+        if places.any?(&:present?)
+          request_search_data(places).in_groups_of(2).zip(search.segments) do |processed_places, segment|
+            segment.update_attributes(origin: processed_places[0], destination: processed_places[1])
+          end
+        end
+        search
+      end
+
+      # Doing no changes. Made for overriding.
+      def request_search_data(places)
+        places
       end
 
       def cookie_params

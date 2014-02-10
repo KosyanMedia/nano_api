@@ -14,8 +14,18 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     @search = search_instance search_params
   end
 
+  def show
+    if @search = NanoApi::SearchIdParser.parse(params[:id])
+      postprocess_search(@search)
+    else
+      Rollbar.report_exception('Failed to parse search id', rollbar_request_data, rollbar_person_data)
+      @search = search_instance(search_params)
+    end
+    render :new
+  end
+
   def create
-    @search = NanoApi::Search.new(search_params)
+    @search = NanoApi::Search.new(search_params.merge(with_request: false))
     cookies[:search_params] = {
       value: @search.params.to_json,
       domain: default_nano_domain

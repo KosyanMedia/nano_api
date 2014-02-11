@@ -3,12 +3,6 @@ module NanoApi
     module Apiable
       extend ActiveSupport::Concern
 
-      included do
-        include NanoApi::Controller::Locatable
-
-        before_filter :initialize_api_instance
-      end
-
     private
 
       def initialize_api_instance

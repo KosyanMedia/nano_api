@@ -18,7 +18,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     if @search = NanoApi::SearchIdParser.parse(params[:id])
       postprocess_search(@search)
     else
-      Rollbar.report_exception('Failed to parse search id', rollbar_request_data, rollbar_person_data)
+      Rollbar.report_exception(ArgumentError.new('Failed to parse search id'), rollbar_request_data, rollbar_person_data)
       @search = search_instance(search_params)
     end
     render :new

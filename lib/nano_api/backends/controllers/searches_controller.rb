@@ -56,7 +56,7 @@ private
   end
 
   def search_params
-    params[:search].is_a?(Hash) ? params[:search] : params
+    params[:search].is_a?(Hash) ? {with_request: params[:with_request]}.merge(params[:search]) : params
   end
 
   def show_hotels?

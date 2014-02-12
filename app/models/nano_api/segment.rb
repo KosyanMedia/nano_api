@@ -10,7 +10,7 @@ module NanoApi
     accepts_nested_attributes_for(:origin, :destination)
 
     def params
-      attributes.merge(origin: origin.present_attributes, destination: destination.present_attributes)
+      present_attributes.merge(origin: origin.params, destination: destination.params)
     end
 
     def initialize_with_defaults attributes={}

@@ -8,6 +8,7 @@ module NanoApi
     attribute :range, type: Boolean, default: false
     attribute :trip_class, type: Integer, in: [0, 1], default: 0
     attribute :with_request, type: Boolean, default: false
+    attribute :price
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -86,11 +87,8 @@ module NanoApi
       result
     end
 
-    def initial_params
-      params.merge(
-        return_date: return_date,
-        one_way: one_way,
-      )
+    def non_default_params
+      Hash[params.to_a - self.class.new.params.to_a]
     end
 
     def self.find id

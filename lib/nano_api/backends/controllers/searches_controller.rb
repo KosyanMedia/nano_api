@@ -2,12 +2,13 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   helper_method :show_hotels?, :show_hotels_type
 
   def pick
-    answer = Net::HTTP.get(URI("#{NanoApi.config.search_server}/searches_results?uuid=#{params[:uuid]}"))
-    render json:  (JSON.parse(answer) rescue answer)
+    url = "#{NanoApi.config.search_server}/searches_results#{params[:version]}#{Settings.searches_results_version}?uuid=#{params[:uuid]}"
+    answer = RestClient.get(url)
+    render json: (JSON.parse(answer) rescue answer)
   end
 
   def get_mirror
-		render json:  JSON.parse(Net::HTTP.get(URI("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}")))
+		render json: JSON.parse(RestClient.get("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}"))
 	end
 
   def new
@@ -56,7 +57,7 @@ private
   end
 
   def search_params
-    params[:search].is_a?(Hash) ? {with_request: params[:with_request]}.merge(params[:search]) : params
+    params[:search].is_a?(Hash) ? params[:search].reverse_merge(with_request: params[:with_request]) : params
   end
 
   def show_hotels?

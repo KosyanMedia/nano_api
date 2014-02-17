@@ -2,7 +2,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   helper_method :show_hotels?, :show_hotels_type
 
   def pick
-    url = "#{NanoApi.config.search_server}/searches_results#{params[:version]}#{Settings.searches_results_version}?uuid=#{params[:uuid]}"
+    url = "#{NanoApi.config.search_server}/searches_results#{params[:version]}?uuid=#{params[:uuid]}"
     answer = RestClient.get(url)
     render json: (JSON.parse(answer) rescue answer)
   end

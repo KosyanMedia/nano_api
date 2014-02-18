@@ -18,7 +18,17 @@ module NanoApi
     delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
 
     def one_way= value
-      self.segments = [segments.first] if value.present? && value != '0'
+      if value.present? && value != '0'
+        self.segments = [segments.first]
+      elsif segments.count == 1
+        segment_params = segments.first.params
+        return_segment_params = segment_params.merge(
+          origin: segment_params[:destination],
+          destination: segment_params[:origin]
+        )
+        return_segment_params[:date] = @return_date if @return_date
+        self.segments << NanoApi::Segment.new(return_segment_params)
+      end
     end
 
     def one_way
@@ -60,6 +70,7 @@ module NanoApi
     end
 
     def return_date= value
+      @return_date = value
       segments[1].date = value if segments[1]
     end
 

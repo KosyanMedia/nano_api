@@ -4,6 +4,9 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def pick
     url = "#{NanoApi.config.search_server}/searches_results#{params[:version]}?uuid=#{params[:uuid]}"
     answer = RestClient.get(url)
+    if answer.is_a?(String) && (rates = JSON.parse(answer).first['currency_rates'])
+      Rails.cache.write(Settings.nano_api.rates_cache, rates.to_json)
+    end
     render json: (JSON.parse(answer) rescue answer)
   end
 

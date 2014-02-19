@@ -14,7 +14,7 @@ module NanoApi
       }
 
       def search params, options = {}
-        path = NanoApi.config.search_path + options[:chain] + (Settings.chain_suffix || '')
+        path = NanoApi.config.search_path + (NanoApi.config.chain_prefix || '') + options[:chain]
         search_params = params.symbolize_keys.merge(
           marker: controller.try(:marker),
           user_ip: request.remote_ip,

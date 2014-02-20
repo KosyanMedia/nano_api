@@ -1,5 +1,6 @@
 NanoApi::Engine.routes.draw do
   resources :searches, only: [:new, :create, :show] do
+    get '', on: :collection, action: 'new', as: :searches_base
     resources :clicks, only: :show do
       get :link, :deeplink, on: :member
     end

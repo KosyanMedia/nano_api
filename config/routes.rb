@@ -1,10 +1,21 @@
 NanoApi::Engine.routes.draw do
-  resources :searches, only: [:new, :create, :show] do
-    get '', on: :collection, action: 'new', as: :searches_base
-    resources :clicks, only: :show do
-      get :link, :deeplink, on: :member
+  resources :searches, only: [:new, :create, :show], path_names: {new: ''}, path: NanoApi.config.search_engine_path do
+    collection do
+      get :new, to: :new # For backwards compatibility
+      post :get_search_params
+    end
+
+    resources :clicks, only: :none do
+      member do
+        get '', action: :show_face
+        get :link
+        get :deeplink, to: :deeplink_face
+        get :show_load, to: :show, as: :show_load_search_click
+        get :deeplink_load, to: :deeplink, as: :deeplink_load_search_click
+      end
     end
   end
+
   post '/adaptors/chains/:chain' => 'searches#create'
 
   resources :clicks, only: :new

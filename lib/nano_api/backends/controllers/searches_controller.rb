@@ -13,16 +13,23 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
   def new
     @search = search_instance search_params
+    @search_params_key = request.query_parameters
   end
 
   def show
-    if @search = NanoApi::SearchIdParser.parse(params[:id])
-      postprocess_search(@search)
-    else
-      Rollbar.report_exception(ArgumentError.new('Failed to parse search id'), rollbar_request_data, rollbar_person_data)
-      @search = search_instance(search_params)
-    end
+    @search = get_search_by_id
+    @search_params_key = {encoded_search: params[:id]}
     render :new
+  end
+
+  def get_search_params
+    result = if params[:encoded_search]
+      params[:id] = params.delete(:encoded_search)
+      get_search_by_id
+    else
+      search_instance search_params
+    end
+    render json: result.non_default_params
   end
 
   def create
@@ -51,6 +58,15 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
 private
+
+  def get_search_by_id
+    if search = NanoApi::SearchIdParser.parse(params[:id])
+      postprocess_search(search)
+    else
+      Rollbar.report_exception(ArgumentError.new('Failed to parse search id'), rollbar_request_data, rollbar_person_data)
+      search_instance(search_params)
+    end
+  end
 
   def search_options
     {

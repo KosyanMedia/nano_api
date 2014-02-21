@@ -15,14 +15,14 @@ module NanoApi
       )
     /ix
 
-    REGEX = /
+    REGEX = /(?<match> # For routing constraints compatibility
       (?<path_parts>#{PATH_PART_PATTERN}{2,})
       (?<range>f)?
       (?<trip_class>b)?
       (?<adults>\d)
       (?<children>\d)?
       (?<infants>\d)?
-    /ix
+    )/ix
 
     TYPE_MAP = {a: 'airport', c: 'city'}
     MIN_TIMEZONE = '-12:00'

@@ -15,20 +15,20 @@ module NanoApi
       )
     /ix
 
-    REGEX = /^
+    REGEX = /
       (?<path_parts>#{PATH_PART_PATTERN}{2,})
       (?<range>f)?
       (?<trip_class>b)?
       (?<adults>\d)
       (?<children>\d)?
       (?<infants>\d)?
-    $/ix
+    /ix
 
     TYPE_MAP = {a: 'airport', c: 'city'}
     MIN_TIMEZONE = '-12:00'
 
     def self.parse(search_id)
-      if match = search_id.match(REGEX)
+      if match = search_id.match(/^#{REGEX}$/)
         search = NanoApi::Search.new(
           range: match[:range].present?,
           trip_class: match[:trip_class].present? ? 1 : 0,

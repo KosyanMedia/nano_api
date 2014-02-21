@@ -1,6 +1,7 @@
 NanoApi::Engine.routes.draw do
-  resources :searches, only: [:new, :create, :show], path_names: {new: ''}, path: NanoApi.config.search_engine_path do
+  resources :searches, only: [:new, :create], path_names: {new: ''}, path: NanoApi.config.search_engine_path do
     collection do
+      get ':id', to: :show, constraints: NanoApi::SearchIdParser::REGEX
       get :new, to: :new # For backwards compatibility
       post :get_search_params
     end

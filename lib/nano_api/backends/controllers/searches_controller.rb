@@ -13,7 +13,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
   def new
     @search = search_instance search_params
-    @search_params_key = request.query_parameters
+    @search_params_key = request.query_parameters || {}
   end
 
   def show

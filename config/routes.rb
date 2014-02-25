@@ -10,8 +10,8 @@ NanoApi::Engine.routes.draw do
         get '', action: :show_face
         get :link
         get :deeplink, to: :deeplink_face
-        get :show_load, to: :show, as: :show_load_search_click
-        get :deeplink_load, to: :deeplink, as: :deeplink_load_search_click
+        get :show_load, to: :show
+        get :deeplink_load, to: :deeplink
       end
     end
   end

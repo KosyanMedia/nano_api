@@ -58,6 +58,10 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
 private
 
+  def search_engine_scope?
+    true
+  end
+
   def get_search_by_id
     if search = NanoApi::SearchIdParser.parse(params[:id])
       postprocess_search(search)

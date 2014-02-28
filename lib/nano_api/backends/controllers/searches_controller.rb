@@ -8,8 +8,8 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
   def get_mirror
-		render json: JSON.parse(RestClient.get("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}"))
-	end
+    render json: JSON.parse(RestClient.get("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}"))
+  end
 
   def new
     @search = search_instance search_params

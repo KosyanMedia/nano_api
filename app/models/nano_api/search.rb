@@ -36,13 +36,23 @@ module NanoApi
     end
 
     def origin= value
-      segments[0].origin = value
-      segments[1].destination = value if segments[1]
+      if value.is_a?(String)
+        segments[0].origin.name = value
+        segments[1].destination.name = value if segments[1]
+      else
+        segments[0].origin = value
+        segments[1].destination = value if segments[1]
+      end
     end
 
     def destination= value
-      segments[0].destination = value
-      segments[1].origin = value if segments[1]
+      if value.is_a?(String)
+        segments[0].destination.name = value
+        segments[1].origin.name = value if segments[1]
+      else
+        segments[0].destination = value
+        segments[1].origin = value if segments[1]
+      end
     end
 
     [:iata=, :name=, :type=].each do |field|
@@ -62,7 +72,7 @@ module NanoApi
     end
 
     def depart_date= value
-      segments[0].date = value
+      segments[0].date = value.is_a?(String) ? value.gsub(/\+/, ' ') : value
     end
 
     def return_date
@@ -70,8 +80,8 @@ module NanoApi
     end
 
     def return_date= value
-      @return_date = value
-      segments[1].date = value if segments[1]
+      @return_date = value.is_a?(String) ? value.gsub(/\+/, ' ') : value
+      segments[1].date = @return_date if segments[1]
     end
 
     def search options = {}

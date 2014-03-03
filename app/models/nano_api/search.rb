@@ -101,7 +101,8 @@ module NanoApi
         [:origin, :destination].each do |place|
           segment.merge!(
             place => segment[place][:iata] || '',
-            :"#{place}_name" => segment[place][:name] # Temporarily until there is the autocomplete validation.
+            # Temporarily until there is the autocomplete validation.
+            :"#{place}_name" => segment[place][:city] || segment[place][:name]
           )
         end
       end

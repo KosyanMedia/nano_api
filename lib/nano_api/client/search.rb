@@ -22,7 +22,7 @@ module NanoApi
           host: request.host
         )
         post_raw(path, search_params, options.reverse_merge!(host: :search_server))
-      rescue RestClient::Exception => exception
+      rescue RestClient::Exception, Errno::ECONNREFUSED => exception
         [exception.http_body, exception.http_code]
       end
 

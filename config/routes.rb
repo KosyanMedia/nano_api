@@ -1,5 +1,5 @@
 NanoApi::Engine.routes.draw do
-  resources :searches, only: [:new, :create], path_names: {new: ''}, path: NanoApi.config.search_engine_path do
+  resources :searches, only: :new, path_names: {new: ''}, path: NanoApi.config.search_engine_path do
     collection do
       get ':id', to: :show, constraints: { id: NanoApi::SearchIdParser::REGEX }
       match :get_search_params

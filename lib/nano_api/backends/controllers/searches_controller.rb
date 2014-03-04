@@ -17,7 +17,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
 
   def show
     @search = get_search_by_id
-    @search_params_key = {encoded_search: params[:id]}
+    @search_params_key = params[:id]
     render :new
   end
 

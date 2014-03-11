@@ -30,7 +30,7 @@ module NanoApi
         cookies[:marker] = {
             :value => marker,
             :domain => default_nano_domain,
-            :expires => affiliate_attribute(:marker_life_time_in_days, 30).days.from_now
+            :expires => 30.days.from_now
         }
       end
 

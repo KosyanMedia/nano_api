@@ -8,6 +8,7 @@ module NanoApi
     attribute :range, type: Boolean, default: false
     attribute :trip_class, type: Integer, in: [0, 1], default: 0
     attribute :with_request, type: Boolean, default: false
+    attribute :open_jaw, type: Boolean, default: false
     attribute :price
 
     embeds_many :segments, class: NanoApi::Segment
@@ -32,38 +33,49 @@ module NanoApi
     end
 
     def one_way
-      segments.count == 1
+      segments.count == 1 && !open_jaw
+    end
+
+    def round_trip
+      segments.count == 2 && !open_jaw
+    end
+
+    # Sets open_jaw to true when it's impossible to represent the search params in the simple form, not when the search
+    # will be processed as open_jaw by Yasen.
+    def set_open_jaw_by_segments
+      self.open_jaw = segments.count > 2 || segments.count == 2 && (segments[0].origin != segments[1].destination ||
+        segments[0].destination != segments[1].origin)
     end
 
     def origin= value
       if value.is_a?(String)
         segments[0].origin.name = value
-        segments[1].destination.name = value if segments[1]
+        segments[1].destination.name = value if round_trip
       else
         segments[0].origin = value
-        segments[1].destination = value if segments[1]
+        segments[1].destination = value if round_trip
       end
     end
 
     def destination= value
       if value.is_a?(String)
         segments[0].destination.name = value
-        segments[1].origin.name = value if segments[1]
+        segments[1].origin.name = value if round_trip
       else
         segments[0].destination = value
-        segments[1].origin = value if segments[1]
+        segments[1].origin = value if round_trip
       end
     end
 
     [:iata=, :name=, :type=].each do |field|
       define_method "origin_#{field}" do |value|
         segments[0].origin.send(field, value)
-        segments[1].destination.send(field, value) if segments[1]
+        segments[1].destination.send(field, value) if round_trip
       end
 
       define_method "destination_#{field}" do |value|
         segments[0].destination.send(field, value)
-        segments[1].origin.send(field, value) if segments[1]
+        segments[1].origin.send(field, value) if round_trip
       end
     end
 
@@ -81,7 +93,7 @@ module NanoApi
 
     def return_date= value
       @return_date = value.is_a?(String) ? value.gsub(/\+/, ' ') : value
-      segments[1].date = @return_date if segments[1]
+      segments[1].date = @return_date if round_trip
     end
 
     def search options = {}
@@ -126,6 +138,12 @@ module NanoApi
         NanoApi::Segment.new(date: Date.current + DEFAULT_RETURN_OFFSET)
       ]
       initialize_without_defaults(attributes)
+    end
+
+    def self.open_jaw_new attributes = {}
+      search = new(segments: 2.times.map { NanoApi::Segment.new }, open_jaw: true)
+      search.update_attributes(attributes)
+      search
     end
 
     alias_method_chain :initialize, :defaults

@@ -10,10 +10,14 @@ module NanoApi
       end
 
       def search_instance attributes = {}
-        search = NanoApi::Search.new(attributes).tap do |search|
-          search.reverse_update_attributes(cookie_params)
-          search.reverse_update_attributes(user_location_attributes)
-        end
+        search = NanoApi::Search.new(cookie_params)
+        search.update_attributes(attributes)
+        postprocess_search(search)
+      end
+
+      def open_jaw_search_instance attributes = {}
+        search = NanoApi::Search.open_jaw_new(open_jaw_cookie_params)
+        search.update_attributes(attributes)
         postprocess_search(search)
       end
 
@@ -36,6 +40,9 @@ module NanoApi
         JSON.parse(cookies[:search_params].presence) rescue {}
       end
 
+      def open_jaw_cookie_params
+        JSON.parse(cookies[:open_jaw_search_params].presence) rescue {}
+      end
     end
   end
 end

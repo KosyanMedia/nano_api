@@ -18,9 +18,9 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def show
     search = get_search_by_id
     if search.open_jaw
-      @search = search
-    else
       @open_jaw_search = search
+    else
+      @search = search
     end
     @search_params_key = params[:id]
     render :new

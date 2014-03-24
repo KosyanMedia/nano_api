@@ -3,6 +3,7 @@ NanoApi::Engine.routes.draw do
     collection do
       get ':id', to: :show, constraints: { id: NanoApi::SearchIdParser::REGEX }
       match :get_search_params
+      get :searches_mirror_results, to: :get_mirror
     end
 
     resources :clicks, only: :none do
@@ -33,5 +34,4 @@ NanoApi::Engine.routes.draw do
   get '/estimated_search_duration' => 'gate_meta#search_duration', as: :estimated_search_duration
 
   get '/searches_results:version' => 'searches#pick', constraints: {version: /.*/}, as: :searches_pick
-  get '/searches_mirror_results' => 'searches#get_mirror'
 end

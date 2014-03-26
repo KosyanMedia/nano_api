@@ -108,6 +108,7 @@ module NanoApi
 
     def search_params
       result = params.merge(trip_class: params[:trip_class] == 0 ? 'Y' : 'C')
+      result.delete(:open_jaw)
       result[:segments].each do |segment|
         [:origin, :destination].each do |place|
           segment.merge!(

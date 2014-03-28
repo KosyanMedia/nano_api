@@ -7,9 +7,9 @@ module NanoApi
         :'en-GB' => :en_GB,
         :'en-IE' => :en_IE,
         :'en-AU' => :en_AU,
-        :'en-NZ' => :en_AU,
-        :'en-IN' => :en,
-        :'en-SG' => :en,
+        :'en-NZ' => :en_NZ,
+        :'en-IN' => :en_IN,
+        :'en-SG' => :en_SG,
         :'en-CA' => :en
       }
 

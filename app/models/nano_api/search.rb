@@ -5,10 +5,25 @@ module NanoApi
     DEFAULT_DEPARTURE_OFFSET = 2.weeks
     DEFAULT_RETURN_OFFSET = 3.weeks
 
+    MAPPING = {
+      :'zh-CN' => :cn,
+      :'en-GB' => :en_GB,
+      :'en-IE' => :en_IE,
+      :'en-AU' => :en_AU,
+      :'en-NZ' => :en_NZ,
+      :'en-IN' => :en_IN,
+      :'en-SG' => :en_SG,
+      :'en-CA' => :en
+    }
+
+    LOCALES_TO_HOSTS = Settings.hosts.respond_to?(:to_hash) ?
+      Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
+
     attribute :trip_class, type: Integer, in: [0, 1], default: 0
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
     attribute :price
+    attribute :locale
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -16,6 +31,15 @@ module NanoApi
     accepts_nested_attributes_for :segments, :passengers
 
     delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
+
+    def host
+      LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
+    end
+
+    def locale
+      value = super.try(:to_sym) || I18n.locale
+      MAPPING[value] || value
+    end
 
     def one_way= value
       if value.present? && value != '0'
@@ -42,7 +66,11 @@ module NanoApi
     # Sets open_jaw to true when it's impossible to represent the search params in the simple form, not when the search
     # will be processed as open_jaw by Yasen.
     def set_open_jaw_by_segments
-      self.open_jaw = segments.count > 2 || segments.count == 2 && (segments[0].origin != segments[1].destination ||
+      self.open_jaw = get_open_jaw_by_segments
+    end
+
+    def get_open_jaw_by_segments
+      segments.count > 2 || segments.count == 2 && (segments[0].origin != segments[1].destination ||
         segments[0].destination != segments[1].origin)
     end
 
@@ -96,6 +124,7 @@ module NanoApi
     end
 
     def search options = {}
+      options[:chain] ||= get_open_jaw_by_segments ? 'rt_openjaw' : 'rt_search_native_format'
       NanoApi.client.search(search_params, options)
     end
 
@@ -107,7 +136,10 @@ module NanoApi
     end
 
     def search_params
-      result = params.merge(trip_class: params[:trip_class] == 0 ? 'Y' : 'C')
+      result = params.merge(
+        trip_class: params[:trip_class] == 0 ? 'Y' : 'C',
+        host: host
+      )
       result.delete(:open_jaw)
       result[:segments].each do |segment|
         [:origin, :destination].each do |place|

@@ -1,12 +1,9 @@
 require 'spec_helper'
 
-describe NanoApi::SearchIdParser do
+describe NanoApi::SearchId do
   subject { described_class }
   describe '.parse' do
     specify { subject.parse('MOW1005LONb1').params[:with_request].should be_true }
-
-    specify { subject.parse('MOW1005LONb1').params[:range].should be_false }
-    specify { subject.parse('MOW1005LONfb1').params[:range].should be_true }
 
     specify { subject.parse('MOW1005LONf1').params[:trip_class].should == 0 }
     specify { subject.parse('MOW1005LONfb1').params[:trip_class].should == 1 }
@@ -65,7 +62,6 @@ describe NanoApi::SearchIdParser do
       it 'is case insensitive' do
         subject.parse('amow1005lonFB2').params.should include(
           passengers: {adults: 2, children: 0, infants: 0},
-          range: true,
           trip_class: 1,
           segments: [{
             origin: { iata: 'MOW', type: 'airport'},
@@ -83,5 +79,67 @@ describe NanoApi::SearchIdParser do
     it('fails to parse two dateless path parts in a row') { subject.parse('MOW1005LON-LED-ROV20051').should be_nil }
     it('fails to parse an unknown type code') { subject.parse('FMOW1005LON-CLED2005AROV1').should be_nil }
     it('fails to parse an invalid date') { subject.parse('MOW2020LON1').should be_nil }
+  end
+
+  describe '.compose' do
+    specify do
+      subject.compose(
+        segments: [
+          { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } },
+          { date: '2014-10-03', origin: { iata: 'BBB', type: 'city' }, destination: { iata: 'CCC', type: 'airport' } },
+          { date: '2015-01-01', origin: { iata: 'DDD', type: 'city' }, destination: { iata: 'AAA', type: 'city' } },
+          { date: '2015-02-15', origin: { iata: 'AAA', type: 'airport' }, destination: { iata: 'BBB', type: 'city' } }
+        ],
+        trip_class: '1',
+        passengers: {
+          adults: 3,
+          children: 2,
+          infants: 1
+        }
+      ).should == 'CAAA0110CBBB0310ACCC-CDDD0101CAAA-AAAA1502CBBBb321'
+    end
+
+    specify do
+      subject.compose(
+        segments: [
+          { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } },
+          { date: '2014-10-03', origin: { iata: 'BBB', type: 'city' }, destination: { iata: 'AAA', type: 'city' } }
+        ],
+        class: '1',
+        passengers: {
+          adults: 4,
+          children: 0,
+          infants: 3
+        }
+      ).should == 'CAAA0110CBBB0310403'
+    end
+
+    specify do
+      subject.compose(
+        segments: [
+          { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } }
+        ],
+        class: '1',
+        passengers: {
+          adults: 4,
+          children: 3,
+          infants: 0
+        }
+      ).should == 'CAAA0110CBBB43'
+    end
+
+    specify do
+      subject.compose(
+        segments: [
+          { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } }
+        ],
+        class: '1',
+        passengers: {
+          adults: 4,
+          children: 0,
+          infants: 0
+        }
+      ).should == 'CAAA0110CBBB4'
+    end
   end
 end

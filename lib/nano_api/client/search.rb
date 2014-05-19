@@ -2,25 +2,13 @@ module NanoApi
   class Client
     module Search
 
-      MAPPING = {
-        :'zh-CN' => :cn,
-        :'en-GB' => :en_GB,
-        :'en-IE' => :en_IE,
-        :'en-AU' => :en_AU,
-        :'en-NZ' => :en_NZ,
-        :'en-IN' => :en_IN,
-        :'en-SG' => :en_SG,
-        :'en-CA' => :en
-      }
-
       def search params, options = {}
         path = NanoApi.config.search_path + (NanoApi.config.chain_prefix || '') + options[:chain]
         search_params = params.symbolize_keys.merge(
           marker: controller.try(:marker),
-          user_ip: request.remote_ip,
-          locale: MAPPING[I18n.locale] || I18n.locale,
-          host: request.host
+          user_ip: request.try(:remote_ip),
         )
+        search_params[:host] = request.host if request.try(:host).present?
         post_raw(path, search_params, options.reverse_merge!(host: :search_server))
       rescue RestClient::Exception, Errno::ECONNREFUSED => exception
         [exception.http_body, exception.http_code]

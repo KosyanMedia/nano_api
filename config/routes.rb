@@ -1,11 +1,13 @@
 NanoApi::Engine.routes.draw do
-  resources :searches, only: :new, path_names: {new: ''}, path: NanoApi.config.search_engine_path do
+  resources :searches, only: [:show, :new], path_names: {new: ''}, path: NanoApi.config.search_engine_path,
+    constraints: { id: NanoApi::SearchId::REGEX } do
     collection do
-      get ':id', to: :show, constraints: { id: NanoApi::SearchIdParser::REGEX }
       match :get_search_params
       get :searches_mirror_results, to: :get_mirror
     end
+  end
 
+  resources :searches, only: :none, path: NanoApi.config.search_engine_path do
     resources :clicks, only: :none do
       member do
         get '', action: :show_face

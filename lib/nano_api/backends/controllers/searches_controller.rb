@@ -68,7 +68,7 @@ private
   end
 
   def get_search_by_id
-    if search = NanoApi::SearchIdParser.parse(params[:id])
+    if search = NanoApi::SearchId.parse(params[:id])
       postprocess_search(search)
       search.set_open_jaw_by_segments # Must be done after the postprocessing.
       search

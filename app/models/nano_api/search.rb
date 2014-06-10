@@ -22,6 +22,7 @@ module NanoApi
     attribute :trip_class, type: Integer, in: [0, 1], default: 0
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
+    attribute :internal, type: Boolean, default: false
     attribute :price
     attribute :locale
 

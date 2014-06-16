@@ -34,7 +34,8 @@ module NanoApi
     delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
 
     def host
-      LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
+      result = LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
+      result && internal? ? "internal.#{result}" : result
     end
 
     def locale

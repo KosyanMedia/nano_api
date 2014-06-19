@@ -10,8 +10,10 @@ module NanoApi
         )
         search_params[:host] = request.host if request.try(:host).present?
         post_raw(path, search_params, options.reverse_merge!(host: :search_server))
-      rescue RestClient::Exception, Errno::ECONNREFUSED => exception
+      rescue RestClient::Exception => exception
         [exception.http_body, exception.http_code]
+      rescue Errno::ECONNREFUSED
+        ['Connection refused', 503]
       end
 
       def search_params id

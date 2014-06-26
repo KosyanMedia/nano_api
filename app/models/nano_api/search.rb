@@ -19,7 +19,7 @@ module NanoApi
     LOCALES_TO_HOSTS = Settings.hosts.respond_to?(:to_hash) ?
       Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
 
-    attribute :trip_class, type: Integer, in: [0, 1], default: 0
+    attribute :trip_class, type: String, in: %w'Y C W F', default: 'Y'
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
     attribute :internal, type: Boolean, default: false
@@ -139,7 +139,7 @@ module NanoApi
 
     def search_params
       result = params.merge(
-        trip_class: params[:trip_class] == 0 ? 'Y' : 'C',
+        trip_class: params[:trip_class],
         host: host
       )
       result.delete(:open_jaw)

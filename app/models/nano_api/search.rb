@@ -16,10 +16,17 @@ module NanoApi
       :'en-CA' => :en
     }
 
+    TRIP_CLASS_MAPPING = {
+      '0' => 'Y',
+      '1' => 'C'
+    }
+
+    TRIP_CLASSES = %w(Y C W F)
+
     LOCALES_TO_HOSTS = Settings.hosts.respond_to?(:to_hash) ?
       Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
 
-    attribute :trip_class, type: String, in: %w'Y C W F', default: 'Y'
+    attribute :trip_class, type: String, in: TRIP_CLASSES, default: 'Y'
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
     attribute :internal, type: Boolean, default: false
@@ -41,6 +48,10 @@ module NanoApi
     def locale
       value = super.try(:to_sym) || I18n.locale
       MAPPING[value] || value
+    end
+
+    def trip_class= value
+      TRIP_CLASS_MAPPING[value.to_s] || super
     end
 
     def one_way= value

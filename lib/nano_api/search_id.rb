@@ -18,7 +18,7 @@ module NanoApi
     REGEX = /(?<match> # For routing constraints compatibility
       (?<path_parts>#{PATH_PART_PATTERN}{2,})
       (?<range>f)?
-      (?<trip_class>[bYCWF])?
+      (?<trip_class>[b#{NanoApi::Search::TRIP_CLASSES.join}])?
       (?<adults>\d)
       (?<children>\d)?
       (?<infants>\d)?

@@ -17,8 +17,7 @@ module NanoApi
 
     REGEX = /(?<match> # For routing constraints compatibility
       (?<path_parts>#{PATH_PART_PATTERN}{2,})
-      (?<range>f)?
-      (?<trip_class>b)?
+      (?<trip_class>[b#{NanoApi::Search::TRIP_CLASSES.join}])?
       (?<adults>\d)
       (?<children>\d)?
       (?<infants>\d)?
@@ -32,8 +31,7 @@ module NanoApi
       def parse(search_id)
         if match = search_id.match(/^#{REGEX}$/)
           search = NanoApi::Search.new(
-            range: match[:range].present?,
-            trip_class: match[:trip_class].present? ? 1 : 0,
+            trip_class: match[:trip_class].try(:upcase) == 'B' ? 'C' : match[:trip_class].presence.try(:upcase) || 'Y',
             passengers: %w(adults children infants).each_with_object({}) { |key, obj| obj[key] = match[key] if match[key] },
             segments: [],
             with_request: true
@@ -73,7 +71,7 @@ module NanoApi
       def compose search
         search = NanoApi::Search.new(search) unless search.is_a?(NanoApi::Search)
         data = {
-          trip_class: search.trip_class == 1 ? 'b' : nil,
+          trip_class: search.trip_class,
           passengers: %w(adults children infants).map { |key| search.passengers.send(key).to_s }.join.sub(/0+$/, ''),
         }
         segments = search.segments

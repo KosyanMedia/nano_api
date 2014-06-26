@@ -33,7 +33,7 @@ module NanoApi
         if match = search_id.match(/^#{REGEX}$/)
           search = NanoApi::Search.new(
             range: match[:range].present?,
-            trip_class: match[:trip_class] == 'b' ? 'C' : match[:trip_class].presence || 'Y',
+            trip_class: match[:trip_class].try(:upcase) == 'B' ? 'C' : match[:trip_class].presence.try(:upcase) || 'Y',
             passengers: %w(adults children infants).each_with_object({}) { |key, obj| obj[key] = match[key] if match[key] },
             segments: [],
             with_request: true

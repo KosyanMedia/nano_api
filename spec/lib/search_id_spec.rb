@@ -7,14 +7,14 @@ describe NanoApi::SearchId do
 
     specify { subject.parse('MOW1005LON1').params[:trip_class].should == 'Y' }
     specify { subject.parse('MOW1005LONb1').params[:trip_class].should == 'C' }
-    specify { subject.parse('MOW1005LONY1').parse[:trip_class].should == 'Y' }
-    specify { subject.parse('MOW1005LONC1').parse[:trip_class].should == 'C' }
-    specify { subject.parse('MOW1005LONW1').parse[:trip_class].should == 'W' }
-    specify { subject.parse('MOW1005LONF1').parse[:trip_class].should == 'F' }
-    specify { subject.parse('MOW1005LONy1').parse[:trip_class].should == 'Y' }
-    specify { subject.parse('MOW1005LONc1').parse[:trip_class].should == 'C' }
-    specify { subject.parse('MOW1005LONw1').parse[:trip_class].should == 'W' }
-    specify { subject.parse('MOW1005LONf1').parse[:trip_class].should == 'F' }
+    specify { subject.parse('MOW1005LONY1').params[:trip_class].should == 'Y' }
+    specify { subject.parse('MOW1005LONC1').params[:trip_class].should == 'C' }
+    specify { subject.parse('MOW1005LONW1').params[:trip_class].should == 'W' }
+    specify { subject.parse('MOW1005LONF1').params[:trip_class].should == 'F' }
+    specify { subject.parse('MOW1005LONy1').params[:trip_class].should == 'Y' }
+    specify { subject.parse('MOW1005LONc1').params[:trip_class].should == 'C' }
+    specify { subject.parse('MOW1005LONw1').params[:trip_class].should == 'W' }
+    specify { subject.parse('MOW1005LONf1').params[:trip_class].should == 'F' }
 
     specify { subject.parse('MOW1005LONfb2').params[:passengers].should == {adults: 2, children: 0, infants: 0} }
     specify { subject.parse('MOW1005LON200532').params[:passengers].should == {adults: 3, children: 2, infants: 0} }

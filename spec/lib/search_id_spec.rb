@@ -16,7 +16,7 @@ describe NanoApi::SearchId do
     specify { subject.parse('MOW1005LONw1').params[:trip_class].should == 'W' }
     specify { subject.parse('MOW1005LONf1').params[:trip_class].should == 'F' }
 
-    specify { subject.parse('MOW1005LONfb2').params[:passengers].should == {adults: 2, children: 0, infants: 0} }
+    specify { subject.parse('MOW1005LONb2').params[:passengers].should == {adults: 2, children: 0, infants: 0} }
     specify { subject.parse('MOW1005LON200532').params[:passengers].should == {adults: 3, children: 2, infants: 0} }
     specify { subject.parse('MOW1005LON2005321').params[:passengers].should == {adults: 3, children: 2, infants: 1} }
 
@@ -68,7 +68,7 @@ describe NanoApi::SearchId do
       end
 
       it 'is case insensitive' do
-        subject.parse('amow1005lonFB2').params.should include(
+        subject.parse('amow1005lonB2').params.should include(
           passengers: {adults: 2, children: 0, infants: 0},
           trip_class: 'C',
           segments: [{

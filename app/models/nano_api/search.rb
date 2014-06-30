@@ -51,7 +51,7 @@ module NanoApi
     end
 
     def trip_class= value
-      TRIP_CLASS_MAPPING[value.to_s] || super
+      super(TRIP_CLASS_MAPPING[value.to_s] || value)
     end
 
     def one_way= value

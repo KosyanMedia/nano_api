@@ -5,8 +5,16 @@ describe NanoApi::SearchId do
   describe '.parse' do
     specify { subject.parse('MOW1005LONb1').params[:with_request].should be_true }
 
-    specify { subject.parse('MOW1005LONf1').params[:trip_class].should == 0 }
-    specify { subject.parse('MOW1005LONfb1').params[:trip_class].should == 1 }
+    specify { subject.parse('MOW1005LON1').params[:trip_class].should == 'Y' }
+    specify { subject.parse('MOW1005LONb1').params[:trip_class].should == 'C' }
+    specify { subject.parse('MOW1005LONY1').parse[:trip_class].should == 'Y' }
+    specify { subject.parse('MOW1005LONC1').parse[:trip_class].should == 'C' }
+    specify { subject.parse('MOW1005LONW1').parse[:trip_class].should == 'W' }
+    specify { subject.parse('MOW1005LONF1').parse[:trip_class].should == 'F' }
+    specify { subject.parse('MOW1005LONy1').parse[:trip_class].should == 'Y' }
+    specify { subject.parse('MOW1005LONc1').parse[:trip_class].should == 'C' }
+    specify { subject.parse('MOW1005LONw1').parse[:trip_class].should == 'W' }
+    specify { subject.parse('MOW1005LONf1').parse[:trip_class].should == 'F' }
 
     specify { subject.parse('MOW1005LONfb2').params[:passengers].should == {adults: 2, children: 0, infants: 0} }
     specify { subject.parse('MOW1005LON200532').params[:passengers].should == {adults: 3, children: 2, infants: 0} }
@@ -62,7 +70,7 @@ describe NanoApi::SearchId do
       it 'is case insensitive' do
         subject.parse('amow1005lonFB2').params.should include(
           passengers: {adults: 2, children: 0, infants: 0},
-          trip_class: 1,
+          trip_class: 'C',
           segments: [{
             origin: { iata: 'MOW', type: 'airport'},
             destination: { iata: 'LON' },
@@ -90,13 +98,13 @@ describe NanoApi::SearchId do
           { date: '2015-01-01', origin: { iata: 'DDD', type: 'city' }, destination: { iata: 'AAA', type: 'city' } },
           { date: '2015-02-15', origin: { iata: 'AAA', type: 'airport' }, destination: { iata: 'BBB', type: 'city' } }
         ],
-        trip_class: '1',
+        trip_class: 'C',
         passengers: {
           adults: 3,
           children: 2,
           infants: 1
         }
-      ).should == 'CAAA0110CBBB0310ACCC-CDDD0101CAAA-AAAA1502CBBBb321'
+      ).should == 'CAAA0110CBBB0310ACCC-CDDD0101CAAA-AAAA1502CBBBC321'
     end
 
     specify do
@@ -105,13 +113,13 @@ describe NanoApi::SearchId do
           { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } },
           { date: '2014-10-03', origin: { iata: 'BBB', type: 'city' }, destination: { iata: 'AAA', type: 'city' } }
         ],
-        class: '1',
+        trip_class: 'Y',
         passengers: {
           adults: 4,
           children: 0,
           infants: 3
         }
-      ).should == 'CAAA0110CBBB0310403'
+      ).should == 'CAAA0110CBBB0310Y403'
     end
 
     specify do
@@ -119,13 +127,13 @@ describe NanoApi::SearchId do
         segments: [
           { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } }
         ],
-        class: '1',
+        trip_class: 'W',
         passengers: {
           adults: 4,
           children: 3,
           infants: 0
         }
-      ).should == 'CAAA0110CBBB43'
+      ).should == 'CAAA0110CBBBW43'
     end
 
     specify do
@@ -133,13 +141,13 @@ describe NanoApi::SearchId do
         segments: [
           { date: '2014-10-01', origin: { iata: 'AAA', type: 'city' }, destination: { iata: 'BBB', type: 'city' } }
         ],
-        class: '1',
+        trip_class: 'Y',
         passengers: {
           adults: 4,
           children: 0,
           infants: 0
         }
-      ).should == 'CAAA0110CBBB4'
+      ).should == 'CAAA0110CBBBY4'
     end
   end
 end

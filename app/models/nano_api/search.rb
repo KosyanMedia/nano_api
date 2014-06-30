@@ -23,7 +23,7 @@ module NanoApi
 
     TRIP_CLASSES = %w(Y C W F)
 
-    LOCALES_TO_HOSTS = Settings.hosts.respond_to?(:to_hash) ?
+    LOCALES_TO_HOSTS = defined?(Settings) && Settings.hosts.respond_to?(:to_hash) ?
       Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
 
     attribute :trip_class, type: String, in: TRIP_CLASSES, default: 'Y'

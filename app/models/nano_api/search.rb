@@ -21,6 +21,8 @@ module NanoApi
     attribute :internal, type: Boolean, default: false
     attribute :price
     attribute :locale
+    attribute :test_name
+    attribute :test_rule
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers

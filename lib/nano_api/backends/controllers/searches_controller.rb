@@ -37,8 +37,8 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
   def slice_split_params
-    params = request.cookie.slice *%w(test_name test_rule)
-    params.values.any?(&:blank?) or Time.now.to_i > request.cookie['test_stop'].to_i ? nil : params
+    params = request.cookies.slice *%w(test_name test_rule)
+    params.values.any?(&:blank?) or Time.now.to_i > request.cookies['test_stop'].to_i ? nil : params
   end
 
   def create

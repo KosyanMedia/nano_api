@@ -5,17 +5,6 @@ module NanoApi
     DEFAULT_DEPARTURE_OFFSET = 2.weeks
     DEFAULT_RETURN_OFFSET = 3.weeks
 
-    MAPPING = {
-      :'zh-CN' => :cn,
-      :'en-GB' => :en_GB,
-      :'en-IE' => :en_IE,
-      :'en-AU' => :en_AU,
-      :'en-NZ' => :en_NZ,
-      :'en-IN' => :en_IN,
-      :'en-SG' => :en_SG,
-      :'en-CA' => :en
-    }
-
     TRIP_CLASS_MAPPING = {
       '0' => 'Y',
       '1' => 'C'
@@ -46,8 +35,7 @@ module NanoApi
     end
 
     def locale
-      value = super.try(:to_sym) || I18n.locale
-      MAPPING[value] || value
+      super.try(:to_sym) || I18n.locale
     end
 
     def trip_class= value
@@ -149,9 +137,11 @@ module NanoApi
     end
 
     def search_params
-      result = params.merge(
+      result = params
+      result.merge!(
         trip_class: params[:trip_class],
-        host: host
+        host: host,
+        locale: result[:locale].to_s.sub('-', '_')
       )
       result.delete(:open_jaw)
       result[:segments].each do |segment|

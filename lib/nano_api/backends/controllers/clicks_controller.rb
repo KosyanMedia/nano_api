@@ -33,7 +33,7 @@ private
     )
 
     if result.present?
-      pixel_query = "?#{result.slice(*%w(click_id gate_id)).to_query}"
+      pixel_query = "?#{result.slice(:click_id, :gate_id).to_query}"
       result[:pixel_url] = URI.join(NanoApi.config.search_server, NanoApi.config.pixel_path, pixel_query).to_s
       result[:method].downcase!
     end

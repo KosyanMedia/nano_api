@@ -1,4 +1,4 @@
-<img src="<%= @click_params[:pixel_url] %>">
+<%= image_tag(@click_params[:pixel_url]) %>
 
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">

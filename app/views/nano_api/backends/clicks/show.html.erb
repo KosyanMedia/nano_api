@@ -1,3 +1,5 @@
+<img src="<%= raw @click_params[:pixel_url] %>">
+
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">
 		var redirect = function(timeout, wrap_url){

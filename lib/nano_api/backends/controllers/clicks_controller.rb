@@ -32,7 +32,12 @@ private
       {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]}
     )
 
-    result[:method].downcase! if result.present?
+    if result.present?
+      pixel_url = "#{NanoApi.config.search_server}/adaptors/pixel_click.png?click_id=#{result[:click_id]}&gate_id=#{result[:gate_id]}"
+      result[:pixel_url] = pixel_url
+      result[:method].downcase!
+    end
+
     result
   end
 

@@ -33,8 +33,8 @@ private
     )
 
     if result.present?
-      pixel_url = "#{NanoApi.config.search_server}/adaptors/pixel_click.png?click_id=#{result[:click_id]}&gate_id=#{result[:gate_id]}"
-      result[:pixel_url] = pixel_url
+      pixel_query = "?#{result.slice(*%w(click_id gate_id)).to_query}"
+      result[:pixel_url] = URI.join(NanoApi.config.search_server, NanoApi.config.pixel_path, pixel_query).to_s
       result[:method].downcase!
     end
 

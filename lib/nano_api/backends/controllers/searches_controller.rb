@@ -11,12 +11,21 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     render json: JSON.parse(RestClient.get("#{NanoApi.config.search_server}/searches_mirror_results?eid=#{params[:eid]}"))
   end
 
+  def handle_search_params_errors search
+    if !(err_keys = search.errors).empty?
+      # TODO: Improve rollbar message
+      Rollbar.report_exception(ArgumentError.new('Wrong search params: ' + err_keys.to_s), rollbar_request_data, rollbar_person_data)
+      search.with_request = false
+    end
+    search
+  end
+
   def new
-    @search = search_instance search_params
+    @search = handle_search_params_errors(search_instance(search_params))
   end
 
   def show
-    search = get_search_by_id
+    search = handle_search_params_errors(get_search_by_id)
     if search.open_jaw
       @open_jaw_search = search
     else

@@ -24,6 +24,8 @@ module NanoApi
     attribute :test_name
     attribute :test_rule
 
+    attr_accessor :errors
+
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
 
@@ -126,6 +128,30 @@ module NanoApi
       segments[1].date = @return_date if round_trip
     end
 
+    def fix_dates_order
+      ordered_dates = segments.length > 1 ? segments.each_cons(2).all? { |l_s, r_s| (l_s.date <=> r_s.date) <= 0 } : true
+      unless ordered_dates
+        segments.each { |segment| segment.date = nil }
+        :unordered_dates
+      end
+    end
+
+    def fix_dates_value
+      min_date = Time.now.getlocal(NanoApi::SearchId::MIN_TIMEZONE).to_date
+      max_date = min_date + 1.year - 1.day
+      valid_dates = segments.all? { |segment|
+        segment.date.try(:between?, min_date, max_date)
+      }
+      unless valid_dates
+        segments.each { |segment| segment.date = nil }
+        :bad_dates
+      end
+    end
+
+    def errors
+      [fix_dates_value, fix_dates_order].compact
+    end
+
     def search options = {}
       options[:chain] ||= if get_open_jaw_by_segments
         options[:openjaw_chain] || Settings.nano_api.openjaw_chain
@@ -175,8 +201,8 @@ module NanoApi
     def initialize_with_defaults attributes = {}
       self.passengers = NanoApi::Passengers.new
       self.segments = [
-        NanoApi::Segment.new(date: Date.current + DEFAULT_DEPARTURE_OFFSET),
-        NanoApi::Segment.new(date: Date.current + DEFAULT_RETURN_OFFSET)
+        NanoApi::Segment.new(),
+        NanoApi::Segment.new()
       ]
       initialize_without_defaults(attributes)
     end

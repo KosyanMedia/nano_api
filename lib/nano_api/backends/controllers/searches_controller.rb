@@ -84,9 +84,14 @@ private
   end
 
   def search_options
+    chain = if marker == default_marker && Settings.locales[I18n.locale].alternate_chain
+      Settings.nano_api.alternate_chain || 'skyscanner_search_native_format'
+    else
+      Settings.nano_api.regular_chain || 'rt_search_native_format'
+    end
     {
       know_english: cookies[:know_english] == 'true',
-      chain: params[:chain]
+      chain: chain
     }
   end
 

@@ -127,7 +127,7 @@ module NanoApi
     end
 
     def search options = {}
-      options[:chain] ||= get_open_jaw_by_segments ? 'rt_openjaw' : 'rt_search_native_format'
+      options[:chain] = get_open_jaw_by_segments ? Settings.nano_api.openjaw_chain : options[:chain]
       NanoApi.client.search(search_params, options)
     end
 

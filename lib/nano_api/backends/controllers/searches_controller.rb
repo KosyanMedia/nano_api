@@ -84,14 +84,15 @@ private
   end
 
   def search_options
-    chain = if marker == default_marker && Settings.locales[I18n.locale].alternate_chain
-      Settings.nano_api.alternate_chain || 'skyscanner_search_native_format'
+    simple_chain_type = if marker == default_marker && CmsEngine::DomainConfig.current.alternate_chain
+      :alternate_chain
     else
-      Settings.nano_api.regular_chain || 'rt_search_native_format'
+      :regular_chain
     end
     {
       know_english: cookies[:know_english] == 'true',
-      chain: chain
+      simple_chain: Settings.nano_api[simple_chain_type],
+      openjaw_chain: Settings.nano_api.openjaw_chain
     }
   end
 

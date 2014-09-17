@@ -10,11 +10,9 @@ module NanoApi
         )
         search_params[:host] = request.host if request.try(:host).present?
         # Send fake host for us users
-        if search_params[:host] == 'www.jetradar.com'
-          user_location = CmsEngine.geoip.try(:country, search_params[:user_ip]) if CmsEngine.geoip
-          if user_location and user_location.country_code2 == 'US'
-            search_params[:host] = 'us.jetradar.com'
-          end
+        if search_params[:host] == 'www.jetradar.com' && serach_params[:user_ip] &&
+          CmsEngine.geoip.try(:country, search_params[:user_ip]).try(:country_code2) == 'US'
+          search_params[:host] = 'us.jetradar.com'
         end
         post_raw(path, search_params, options.reverse_merge!(host: :search_server))
       rescue RestClient::Exception => exception

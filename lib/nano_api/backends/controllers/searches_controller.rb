@@ -84,15 +84,12 @@ private
   end
 
   def search_options
-    simple_chain_type = if marker == default_marker && CmsEngine::DomainConfig.current.alternate_chain
-      :alternate_chain
-    else
-      :regular_chain
+    simple_chain = if marker == default_marker && CmsEngine::DomainConfig.current.alternate_chain
+      Settings.nano_api.alternate_chain
     end
     {
       know_english: cookies[:know_english] == 'true',
-      simple_chain: Settings.nano_api[simple_chain_type],
-      openjaw_chain: Settings.nano_api.openjaw_chain
+      simple_chain: simple_chain
     }
   end
 

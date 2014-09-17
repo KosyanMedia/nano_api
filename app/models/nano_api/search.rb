@@ -127,7 +127,11 @@ module NanoApi
     end
 
     def search options = {}
-      options[:chain] ||= options[get_open_jaw_by_segments ? :openjaw_chain : :simple_chain]
+      options[:chain] ||= if get_open_jaw_by_segments
+        options[:openjaw_chain] || Settings.nano_api.openjaw_chain
+      else
+        options[:simple_chain] || Settings.nano_api.regular_chain
+      end
       NanoApi.client.search(search_params, options)
     end
 

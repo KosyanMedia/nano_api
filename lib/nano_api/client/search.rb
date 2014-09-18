@@ -12,7 +12,7 @@ module NanoApi
         search_params[:host] = request.host if request.try(:host).present?
 
         if user_ip &&
-          (country_host_override = CmsEngine::DomainConfig.current.country_host_override.with_indifferent_access) &&
+          (country_host_override = CmsEngine::DomainConfig.current.country_host_override.try(:with_indifferent_access)) &&
           (country_code = CmsEngine.geoip.try(:country, user_ip).try(:country_code2)) &&
           (host_replacement = country_host_override[country_code])
           search_params[:host] = host_replacement

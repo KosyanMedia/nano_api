@@ -23,6 +23,7 @@ module NanoApi
     attribute :locale
     attribute :test_name
     attribute :test_rule
+    attribute :auid
 
     attr_accessor :errors
 

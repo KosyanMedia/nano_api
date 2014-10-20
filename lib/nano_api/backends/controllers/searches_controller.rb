@@ -50,8 +50,12 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     split_description.values.any?(&:blank?) || Time.now.to_i > request.cookies['test_stop'].to_i ? nil : split_description
   end
 
+  def slice_auid_params
+    request.cookies.slice(*%w(auid))
+  end
+
   def create
-    @search = NanoApi::Search.new(search_params.merge(with_request: false).merge(slice_split_params || {}))
+    @search = NanoApi::Search.new(search_params.merge(with_request: false).merge(slice_split_params || {}).merge(slice_auid_params))
     cookies.permanent[@search.open_jaw ? :open_jaw_search_params : :search_params] = {
       value: @search.params.to_json,
       domain: default_nano_domain

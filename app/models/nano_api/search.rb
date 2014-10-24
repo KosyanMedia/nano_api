@@ -202,8 +202,8 @@ module NanoApi
     def initialize_with_defaults attributes = {}
       self.passengers = NanoApi::Passengers.new
       self.segments = [
-        NanoApi::Segment.new(),
-        NanoApi::Segment.new()
+        NanoApi::Segment.new(date: Date.current + DEFAULT_DEPARTURE_OFFSET),
+        NanoApi::Segment.new(date: Date.current + DEFAULT_RETURN_OFFSET)
       ]
       initialize_without_defaults(attributes)
     end

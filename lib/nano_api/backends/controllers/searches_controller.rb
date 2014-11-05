@@ -58,7 +58,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     os = Jetradar::UserAgentParser.parse(request.env['HTTP_USER_AGENT']).os
     platform = {device: is_tablet_device? && 'tablet' || is_mobile_device? && 'mobile' || 'desktop'}
     platform[:os] = os.name if os.name.present?
-    platform[:os_version] = os.version if os.version.present?
+    platform[:os_version] = os.version.to_s if os.version.present?
     {platform: platform}
   end
 

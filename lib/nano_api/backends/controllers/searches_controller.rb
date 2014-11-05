@@ -54,8 +54,22 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     request.cookies.slice(*%w(auid))
   end
 
+  def platform_params
+    os = Jetradar::UserAgentParser.parse(request.env['HTTP_USER_AGENT']).os
+    platform = {device: is_tablet_device? && 'tablet' || is_mobile_device? && 'mobile' || 'desktop'}
+    platform[:os] = os.name if os.name.present?
+    platform[:os_version] = os.version if os.version.present?
+    {platform: platform}
+  end
+
   def create
-    @search = NanoApi::Search.new(search_params.merge(with_request: false).merge(slice_split_params || {}).merge(slice_auid_params))
+    @search = NanoApi::Search.new(
+      search_params.
+        merge(with_request: false).
+        merge(slice_split_params || {}).
+        merge(slice_auid_params).
+        merge(platform_params)
+    )
     cookies.permanent[@search.open_jaw ? :open_jaw_search_params : :search_params] = {
       value: @search.params.to_json,
       domain: default_nano_domain

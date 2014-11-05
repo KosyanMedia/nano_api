@@ -25,7 +25,7 @@ module NanoApi
     attribute :test_rule
     attribute :auid
 
-    attr_accessor :errors
+    attr_accessor :errors, :platform
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -172,9 +172,9 @@ module NanoApi
     def search_params
       result = params
       result.merge!(
-        trip_class: params[:trip_class],
         host: host,
-        locale: result[:locale].to_s.sub('-', '_')
+        locale: result[:locale].to_s.sub('-', '_'),
+        platform: platform
       )
       result.delete(:open_jaw)
       result[:segments].each do |segment|

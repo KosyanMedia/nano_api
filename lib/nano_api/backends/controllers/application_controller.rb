@@ -5,6 +5,16 @@ module NanoApi
 
     protected
 
+      def fetch_auid
+        auid = RestClient.get(NanoApi.config.auid_server).tr('\"', '')
+        cookies.permanent["auid"] = auid
+        auid
+      rescue RestClient::Exception => exception
+        ''
+      rescue Errno::ECONNREFUSED
+        ''
+      end
+
       def forward_json json, status = :ok
         response.content_type = Mime::JSON
         if defined?(Rollbar) && status != :ok

@@ -23,9 +23,8 @@ module NanoApi
     attribute :locale
     attribute :test_name
     attribute :test_rule
-    attribute :auid
 
-    attr_accessor :errors, :platform
+    attr_accessor :errors, :platform, :_ga, :auid
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -174,7 +173,9 @@ module NanoApi
       result.merge!(
         host: host,
         locale: result[:locale].to_s.sub('-', '_'),
-        platform: platform
+        platform: platform,
+        auid: auid,
+        _ga: _ga
       )
       result.delete(:open_jaw)
       result[:segments].each do |segment|

@@ -51,7 +51,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
   def slice_auid_params
-    request.cookies.slice(*%w(auid))
+    request.cookies.slice(*%w(auid _ga))
   end
 
   def platform_params

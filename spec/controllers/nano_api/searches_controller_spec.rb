@@ -23,12 +23,12 @@ describe NanoApi::SearchesController do
           return_date: Date.parse('2012-04-01'),
           trip_class: 0,
           adults: 1
-        }.stringify_keys!
+        }
       }}
 
       context do
         before{get :new, use_route: :nano_api}
-        specify{assigns[:search].attributes.should include({'origin_name' => 'Moscow', 'origin_iata' => 'MOW'})}
+        specify{assigns[:search].attributes.should include({origin_name: 'Moscow', origin_iata: 'MOW'})}
       end
 
       context 'unwrapped params without affiliate' do
@@ -51,13 +51,14 @@ describe NanoApi::SearchesController do
         let(:cookies_defaults){{
           origin_iata: 'MOW',
           destination_iata: 'LON'
-        }.stringify_keys!}
+        }}
+
         before do
           cookies.stub(:[]).with(:marker).and_return('direct')
           cookies.stub(:[]).with(:search_params) do
             {
               params_attributes: {
-                origin: { iata: 'BKK' },
+                origin: { iata: 'MOW' },
                 destination: { iata: 'LON' }
               }
             }.to_json
@@ -74,31 +75,6 @@ describe NanoApi::SearchesController do
           specify{assigns[:search].attributes.should include search[:search]}
         end
       end
-    end
-  end
-
-  describe 'GET :show' do
-    let(:params){{
-      search: {
-        params_attributes: {
-          origin_iata: 'LED',
-          destination_iata: 'LED',
-          depart_date: '2012-04-01',
-          return_date: '2012-04-01',
-          trip_class: 0,
-          adults: 1
-        }
-      }
-    }}
-
-    before do
-      NanoApi::Client.any_instance.stub(:search_params).with('1').and_return(params)
-    end
-
-    it 'should be successful' do
-      get :show, id: 1, use_route: :nano_api
-      response.should be_success
-      response.should render_template(:new)
     end
   end
 
@@ -121,25 +97,6 @@ describe NanoApi::SearchesController do
       end
 
       specify{cookies[:search_params].should == assigns[:search].search_params.to_json}
-    end
-
-    context do
-      it 'should increment current referrer searches count' do
-        request.env['HTTP_REFERER'] = 'http://ya.ru'
-        get :new, { use_route: :nano_api }
-        session[:current_referer][:search_count].should == 0
-
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 1
-
-        request.env['HTTP_REFERER'] = 'http://ya.ru'
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 2
-
-        request.env['HTTP_REFERER'] = 'http://google.com'
-        post :create, use_route: :nano_api
-        session[:current_referer][:search_count].should == 1
-      end
     end
   end
 

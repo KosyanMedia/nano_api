@@ -1,88 +1,197 @@
 module NanoApi
   class Search
-    include NanoApi::Model
+    include ActiveData::Model
 
-    attribute :origin_iata
-    attribute :origin_name, &:origin_name_default
-    attribute :destination_iata
-    attribute :destination_name, &:destination_name_default
-    attribute(:depart_date, type: Date){Date.current + 2.weeks}
-    attribute(:return_date, type: Date){Date.current + 3.weeks}
-    attribute :range, type: Boolean, default: false
-    attribute :one_way, type: Boolean, default: false
-    attribute :trip_class, type: Integer, in: (0..2), default: 0
-    attribute :adults, type: Integer, in: (1..9), default: 1
-    attribute :children, type: Integer, in: (0..8), default: 0
-    attribute :infants, type: Integer, in: (0..5), default: 0
-    attribute :feature
+    DEFAULT_DEPARTURE_OFFSET = 2.weeks
+    DEFAULT_RETURN_OFFSET = 3.weeks
 
-    alias_method :oneway=, :one_way=
-    alias_method :oneway, :one_way
+    TRIP_CLASS_MAPPING = {
+      '0' => 'Y',
+      '1' => 'C'
+    }
 
-    def passengers
-      [adults, children, infants].sum
+    TRIP_CLASSES = %w(Y C W F)
+
+    LOCALES_TO_HOSTS = defined?(Settings) && Settings.hosts.respond_to?(:to_hash) ?
+      Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
+
+    attribute :trip_class, type: String, in: TRIP_CLASSES, default: 'Y'
+    attribute :with_request, type: Boolean, default: false
+    attribute :open_jaw, type: Boolean, default: false
+    attribute :internal, type: Boolean, default: false
+    attribute :price
+    attribute :locale
+    attribute :test_name
+    attribute :test_rule
+
+    attr_accessor :errors, :platform, :_ga, :auid
+
+    embeds_many :segments, class: NanoApi::Segment
+    embeds_one :passengers, class: NanoApi::Passengers
+
+    accepts_nested_attributes_for :segments, :passengers
+
+    delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
+
+    def host
+      result = LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
+      result && internal? ? "internal.#{result}" : result
     end
 
-    [:origin, :destination].each do |name|
-      define_method name do
-        {}.tap do |place|
-          place.merge!(:name => send("#{name}_name")) if send("#{name}_name").present?
-          place.merge!(:iata => send("#{name}_iata")) if send("#{name}_iata").present?
-        end
-      end
+    def locale
+      super.try(:to_sym) || I18n.locale
+    end
 
-      define_method "#{name}=" do |data|
-        if data.is_a?(Hash)
-          data.symbolize_keys! unless data.is_a?(HashWithIndifferentAccess)
-          send "#{name}_name=", data[:name] if !send("#{name}_name?") && data.key?(:name)
-          send "#{name}_iata=", data[:iata] if !send("#{name}_iata?") && data.key?(:iata)
-        else
-          send "#{name}_name=", data
-        end
-      end
+    def trip_class= value
+      super(TRIP_CLASS_MAPPING[value.to_s] || value)
+    end
 
-      define_method "#{name}_iata=" do |value|
-        variable = "@#{name}_name_default"
-        remove_instance_variable variable if instance_variable_defined? variable
-        write_attribute "#{name}_iata", value
-      end
-
-      define_method "#{name}_name_default" do
-        variable = "@#{name}_name_default"
-        if instance_variable_defined?(variable)
-          instance_variable_get(variable).presence || send("#{name}_iata")
-        else
-          instance_variable_set(variable,
-            JSON.parse(NanoApi.client.place(send("#{name}_iata"))).first.try(:[], 'name'))
-          send("#{name}_name_default")
-        end
+    def one_way= value
+      if value.present? && value != '0'
+        self.segments = [segments.first]
+      elsif segments.count == 1
+        segment_params = segments.first.params
+        return_segment_params = segment_params.merge(
+          origin: segment_params[:destination],
+          destination: segment_params[:origin]
+        )
+        return_segment_params[:date] = @return_date if @return_date
+        self.segments << NanoApi::Segment.new(return_segment_params)
       end
     end
 
-    def return_date_for_search
-      return_date unless one_way
+    def one_way
+      segments.count == 1 && !open_jaw
+    end
+
+    def round_trip
+      segments.count == 2 && !open_jaw
+    end
+
+    # Sets open_jaw to true when it's impossible to represent the search params in the simple form, not when the search
+    # will be processed as open_jaw by Yasen.
+    def set_open_jaw_by_segments
+      self.open_jaw = get_open_jaw_by_segments
+    end
+
+    def get_open_jaw_by_segments
+      segments.count > 2 || segments.count == 2 && (segments[0].origin != segments[1].destination ||
+        segments[0].destination != segments[1].origin)
+    end
+
+    def origin= value
+      if value.is_a?(String)
+        segments[0].origin.name = value
+        segments[1].destination.name = value if round_trip
+      else
+        segments[0].origin = value
+        segments[1].destination = value if round_trip
+      end
+    end
+
+    def destination= value
+      if value.is_a?(String)
+        segments[0].destination.name = value
+        segments[1].origin.name = value if round_trip
+      else
+        segments[0].destination = value
+        segments[1].origin = value if round_trip
+      end
+    end
+
+    [:iata=, :name=, :type=].each do |field|
+      define_method "origin_#{field}" do |value|
+        segments[0].origin.send(field, value)
+        segments[1].destination.send(field, value) if round_trip
+      end
+
+      define_method "destination_#{field}" do |value|
+        segments[0].destination.send(field, value)
+        segments[1].origin.send(field, value) if round_trip
+      end
+    end
+
+    def depart_date
+      segments[0].date
+    end
+
+    def depart_date= value
+      segments[0].date = value.is_a?(String) ? value.gsub(/\+/, ' ') : value
+    end
+
+    def return_date
+      segments[1].try(:date) || segments[0].date
+    end
+
+    def return_date= value
+      @return_date = value.is_a?(String) ? value.gsub(/\+/, ' ') : value
+      segments[1].date = @return_date if round_trip
+    end
+
+    def fix_dates_order
+      ordered_dates = segments.length > 1 ? segments.each_cons(2).all? { |l_s, r_s| (l_s.date <=> r_s.date) <= 0 } : true
+      unless ordered_dates
+        segments.each { |segment| segment.date = nil }
+        :unordered_dates
+      end
+    end
+
+    def fix_dates_value
+      min_date = Time.now.getlocal(NanoApi::SearchId::MIN_TIMEZONE).to_date
+      max_date = min_date + 1.year - 1.day
+      valid_dates = segments.all? { |segment|
+        segment.date.try(:between?, min_date, max_date)
+      }
+      unless valid_dates
+        segments.each { |segment| segment.date = nil }
+        :bad_dates
+      end
+    end
+
+    def errors
+      [fix_dates_value, fix_dates_order].compact
     end
 
     def search options = {}
-      NanoApi.client.search(attributes_for_search, options)
+      options[:chain] ||= if get_open_jaw_by_segments
+        options[:openjaw_chain] || Settings.nano_api.openjaw_chain
+      else
+        options[:simple_chain] || Settings.nano_api.regular_chain
+      end
+      NanoApi.client.search(search_params, options)
     end
 
-    [:search, :cookies].each do |postfix|
-      define_method "attributes_for_#{postfix}" do
-        Hash[attribute_names.map do |name|
-          [name, respond_to?("#{name}_for_#{postfix}") ? send("#{name}_for_#{postfix}") : send(name)]
-        end]
-      end
+    def params
+      present_attributes.merge(
+        segments: segments.map(&:params),
+        passengers: passengers.present_attributes
+      )
     end
 
     def search_params
-      {
-        :params_attributes =>
-          Hash[['origin', 'destination', 'depart_date', 'return_date', 'range',
-          'adults', 'children', 'infants', 'trip_class', 'one_way', 'oneway'].map do |name|
-            [name, send(name)]
-          end]
-      }
+      result = params
+      result.merge!(
+        host: host,
+        locale: result[:locale].to_s.sub('-', '_'),
+        platform: platform,
+        auid: auid,
+        _ga: _ga
+      )
+      result.delete(:open_jaw)
+      result[:segments].each do |segment|
+        [:origin, :destination].each do |place|
+          segment.merge!(
+            place => segment[place][:iata] || '',
+            # Temporarily until there is the autocomplete validation.
+            :"#{place}_name" => segment[place][:city] || segment[place][:name]
+          )
+        end
+      end
+      result
+    end
+
+    def non_default_params
+      Hash[params.to_a - self.class.new.params.to_a]
     end
 
     def self.find id
@@ -91,5 +200,21 @@ module NanoApi
       new(attributes)
     end
 
+    def initialize_with_defaults attributes = {}
+      self.passengers = NanoApi::Passengers.new
+      self.segments = [
+        NanoApi::Segment.new(date: Date.current + DEFAULT_DEPARTURE_OFFSET),
+        NanoApi::Segment.new(date: Date.current + DEFAULT_RETURN_OFFSET)
+      ]
+      initialize_without_defaults(attributes)
+    end
+
+    def self.open_jaw_new attributes = {}
+      search = new(segments: 2.times.map { NanoApi::Segment.new }, open_jaw: true)
+      search.update_attributes(attributes)
+      search
+    end
+
+    alias_method_chain :initialize, :defaults
   end
 end

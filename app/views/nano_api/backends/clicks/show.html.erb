@@ -1,9 +1,10 @@
+<%= image_tag(@click_params[:pixel_url], onload: "redirect(window.wrapUrl || '');") %>
+
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">
-		var redirect = function(timeout, wrap_url){
-			setTimeout(function(){
-				window.location.href = wrap_url + '<%= raw @click_params[:url] %>';
-			}, timeout);
+		var redirect = function(wrap_url){
+                        window.do_redirect = true;
+			window.location.href = wrap_url + '<%= raw @click_params[:url] %>';
 		}
   </script>
   <%= render 'counter' %>
@@ -11,14 +12,17 @@
   <%= render 'form', form: @click_params %>
 
   <script type="text/javascript">
-		var redirect = function(timeout){
-			setTimeout(function(){
-				document.getElementById('nano_api_click_form').submit();
-			}, timeout);
+		var redirect = function(){
+                        window.do_redirect = true;
+			document.getElementById('nano_api_click_form').submit();
 		}
   </script>
 <% end %>
 
 <script type="text/javascript">
-	redirect(window.timeout || 0, window.wrapUrl || '');
+        setTimeout(function(){
+            if (window.do_redirect !== true) {
+                redirect(window.wrapUrl || '');
+            }
+        }, 3000);
 </script>

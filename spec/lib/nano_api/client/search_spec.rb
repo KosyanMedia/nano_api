@@ -11,16 +11,29 @@ describe NanoApi::Client do
   describe '.search' do
     let(:path){'searches.json'}
 
+    context 'with search_path config defined' do
+      before { NanoApi.config.stub(:search_path).and_return('searches_jetradar') }
+      specify do
+        subject.should_receive(:post_raw).with 'searches_jetradar', anything, anything
+        subject.search({})
+      end
+    end
+
     context 'normal response' do
       before do
-        stub_http_request(:post, fake).to_return(body: '{tickets: [{test: 1}, {test: 2]}')
+        stub_http_request(:post, fake).to_return(body: '{tickets: [{test: 1}, {test: 2}]}')
       end
 
-      it 'should require api for search action with given params' do
+      it 'returns signature as set in api_client_signature' do
         subject.stub(:api_client_signature).and_return('test_signature')
-        rest_client.stub(:[]).with('searches.json').and_return(subject)
-        subject.should_receive(:post).with 'searches', hash_including(
-          signature: 'test_signature',
+        subject.should_receive(:post_raw).with 'searches', hash_including(signature: 'test_signature'),
+          host: :search_server
+        subject.search({})
+      end
+
+      it 'requires api for search action with given params' do
+        subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :en,
           search: {
             host: 'test.com',
             marker: '12346.test',
@@ -29,13 +42,45 @@ describe NanoApi::Client do
               origin_iata: 'LED'
             }
           }
-        ), { parse: false, search_host: true }
+        ), {host: :search_server }
 
-        subject.search(marker: 'test', origin_iata: 'LED')
+        subject.search(origin_iata: 'LED')
+      end
+
+      it 'uses marker and host params' do
+        subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :en,
+          search: {
+            host: 'bar.com',
+            marker: 'foo',
+            user_ip: '127.1.1.1',
+            params_attributes: {
+              origin_iata: 'LED'
+            }
+          }
+        ), {host: :search_server }
+
+        subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com')
+      end
+
+      it 'uses marker, host, user_ip and locale params' do
+        subject.should_receive(:post_raw).with 'searches', hash_including(
+          locale: :'en_GB',
+          search: {
+            host: 'bar.com',
+            marker: 'foo',
+            user_ip: '127.1.1.2',
+            params_attributes: {
+              origin_iata: 'LED'
+            }
+          }
+        ), {host: :search_server}
+
+        subject.search(origin_iata: 'LED', marker: 'foo', host: 'bar.com', locale: :'en-GB', user_ip: '127.1.1.2')
       end
 
       it 'should return api response without any modifications' do
-        subject.search({}).should == '{tickets: [{test: 1}, {test: 2]}'
+        subject.search({}).should == '{tickets: [{test: 1}, {test: 2}]}'
       end
     end
 
@@ -86,7 +131,6 @@ describe NanoApi::Client do
       subject.search_duration.should == 23
     end
   end
-
 
   describe '.api_client_signature' do
     it 'should generate correct signature' do

@@ -2,10 +2,14 @@ require 'active_support/core_ext/hash'
 require 'json'
 require 'digest/md5'
 
+Dir[NanoApi::Engine.root.join(*%w(lib nano_api client *.rb))].each { |f| require f }
+
 module NanoApi
   class Client
+    class RequestError < StandardError; end
+
     AFFILIATE_MARKER_PATTERN = /\A(\d{5})/
-    MAPPING = { :'zh-CN' => :cn, :'en-GB' => :'en_GB', :'en-AU' => :'en_AU' }
+
     DEFAULT_HOST_KEY = :nano_server
 
     include NanoApi::Client::Search
@@ -13,9 +17,9 @@ module NanoApi
     include NanoApi::Client::Places
     include NanoApi::Client::MinimalPrices
     include NanoApi::Client::Airlines
-    include NanoApi::Client::UiEvents
     include NanoApi::Client::Overmind
     include NanoApi::Client::Affiliate
+    include NanoApi::Client::WhiteLabel
 
     attr_reader :controller
     delegate :request, :session, :marker, to: :controller, allow_nil: true
@@ -30,16 +34,11 @@ module NanoApi
     end
     alias affiliate? affilate?
 
-    def self.site search_host = false, host_key = nil
-      host = if search_host || !NanoApi.config.nano_server
-        NanoApi.config.search_server
-      else
-        host_key ||= DEFAULT_HOST_KEY
-
-        NanoApi.config.send(host_key) || NanoApi.config.send(DEFAULT_HOST_KEY)
+    def self.site host = nil
+      unless host.is_a?(String)
+        host = host && NanoApi.config.send(host) || NanoApi.config.nano_server || NanoApi.config.search_server
       end
-
-      RestClient::Resource.new(host)
+      (@site ||= {})[host] ||= RestClient::Resource.new(host)
     end
 
     def self.affiliate_marker? marker
@@ -61,56 +60,43 @@ module NanoApi
   protected
 
     def get *args
-      perform :get, *args
+      JSON.parse perform(:get, *args)
     end
 
     def post *args
-      perform :post, *args
+      JSON.parse perform(:post, *args)
     end
 
-    def get_raw path, params = {}, options = {}
-      get path, params, options.merge(parse: false)
+    def get_raw *args
+      perform(:get, *args)
     end
 
-    def post_raw path, params = {}, options = {}
-      post path, params, options.merge(parse: false)
+    def post_raw *args
+      perform(:post, *args)
     end
 
     def perform method, path, params = {}, options = {}
-      options.reverse_merge!(parse: true)
-
-      params.reverse_merge!(locale: MAPPING[I18n.locale] || I18n.locale)
-      path += '.json'
-
-      headers = {}
-      if request
-        params.reverse_merge!(user_ip: request.try(:remote_ip))
-        headers[:accept_language] = request.env['HTTP_ACCEPT_LANGUAGE']
-        headers[:user_agent] = request.env['HTTP_USER_AGENT']
-        headers[:cookie] = request.env.fetch('HTTP_COOKIE', '')
-        headers['X-Real-Ip'] = request.remote_ip || ''
-        headers['X-Search-Host'] = request.host || ''
-        if request.methods.include?(:url)
-          headers['X-Search-Url'] = request.url || ''
-        end
-        headers['X-Referer'] = request.referer || ''
-
-        if session[:current_referer]
-          headers[:referer] = session[:current_referer][:referer]
-          headers[:x_landing_page] = session[:current_referer][:landing_page]
-          headers[:x_search_count] = session[:current_referer][:search_count]
-        end
-      end
-
       params[:signature] = signature(params[:marker], options[:signature]) if options[:signature]
 
-      response = if method == :get
-        path = [path, params.to_query].delete_if(&:blank?).join('?')
-        site(options[:search_host], options[:host_key])[path].send(method, headers)
+      headers = if request
+        Rack::Proxy.extract_http_request_headers(request.env).except('HOST').merge(
+          x_referer: request.referer || '',
+          x_search_host: request.host || '',
+          x_search_url: request.url || '',
+          x_real_ip: request.ip || ''
+        )
       else
-        site(options[:search_host], options[:host_key])[path].send(method, params, headers)
+        {}
       end
-      options[:parse] ? JSON.parse(response) : response
+
+      headers[:content_type] = :json
+
+      if method == :get
+        path = [path, params.to_query].delete_if(&:blank?).join('?')
+        site(options[:host])[path].send(method, headers)
+      else
+        site(options[:host])[path].send(method, params.to_json, headers)
+      end
     end
   end
 end

@@ -28,5 +28,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'forgery'
 
   s.add_runtime_dependency 'rest-client'
-  s.add_runtime_dependency 'addressable'
+  s.add_runtime_dependency 'active_data'
+  s.add_runtime_dependency 'rack-proxy', '>= 0.5.10'
 end

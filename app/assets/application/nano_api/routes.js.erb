@@ -11,8 +11,7 @@ NANO.bind("module:api.routes:ready", function(){
       nearest_cities_prices: helpers.nearest_cities_prices_path(format: :json),
       search_click_path: helpers.search_click_path(':search_id', ':id'),
       airline_homepage: helpers.link_search_click_path(':search_id', ':id'),
-      airline_deeplink: helpers.deeplink_search_click_path(':search_id', ':id'),
-      mass_create_ui_events: helpers.mass_create_ui_events_path(format: :json)
+      airline_deeplink: helpers.deeplink_search_click_path(':search_id', ':id')
     }
   %>
   <% routes.each do |(name, path)| %>

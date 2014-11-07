@@ -32,7 +32,12 @@ private
       {unique: _uniq_click?('c'), ref_name: params[:ref_name], ref_value: params[:ref_value], fallback: params[:fallback]}
     )
 
-    result[:method].downcase! if result.present?
+    if result.present?
+      pixel_query = "?#{result.slice(:click_id, :gate_id).to_query}"
+      result[:pixel_url] = URI.join(NanoApi.config.search_server, NanoApi.config.pixel_path, pixel_query).to_s
+      result[:method].downcase!
+    end
+
     result
   end
 

@@ -1,4 +1,6 @@
 require 'active_support'
+require 'active_data'
+require 'rack-proxy'
 require 'rest_client'
 require 'nano_api/version'
 require 'nano_api/engine' if defined? Rails
@@ -20,6 +22,9 @@ module NanoApi
     autoload_under 'controllers' do
       autoload :SearchesController
       autoload :ClicksController
+      autoload :ApplicationController
     end
   end
 end
+
+ActiveSupport.run_load_hooks(:nano_api)

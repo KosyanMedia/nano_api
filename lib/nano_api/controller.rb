@@ -7,7 +7,8 @@ module NanoApi
         include NanoApi::Controller::Apiable
         include NanoApi::Controller::Locatable
         include NanoApi::Controller::Markerable
-        include NanoApi::Controller::Referrerable
+
+        before_filter :initialize_api_instance
       end
     end
 

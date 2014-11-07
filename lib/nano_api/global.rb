@@ -14,7 +14,7 @@ module NanoApi
     end
 
     def config
-      @config ||= begin
+      @config ||= defined?(Settings) ? NanoApi::Config.new(Settings.nano_api.try(:to_hash)) : begin
         file = File.join(root, 'config', 'nano_api.yml')
         if File.exist?(file)
           NanoApi::Config.new(YAML.load_file(file)[env])

@@ -16,19 +16,19 @@ module NanoApi
     private
 
       def handle_marker
-        marker = params[:marker].presence || params[:ref].presence
-        if marker && _new_marker?(marker)
-          set_marker(marker)
-        elsif cookies[:tmp_marker].blank?
+        new_marker = params[:marker].presence || params[:ref].presence
+        if new_marker && _new_marker?(new_marker)
+          set_marker(new_marker)
+        elsif marker.blank?
           set_marker(default_marker)
         end
       end
 
-      def set_marker(marker)
-        @marker = marker
+      def set_marker(new_marker)
+        @marker = new_marker
 
         cookies[:tmp_marker] = {
-            :value => marker,
+            :value => new_marker,
             :domain => default_nano_domain,
             :expires => 10.minutes.from_now
         }
@@ -52,8 +52,8 @@ module NanoApi
         end
       end
 
-      def _new_marker?(marker)
-        marker.present? && marker != cookies[:tmp_marker]
+      def _new_marker?(new_marker)
+        new_marker.present? && new_marker != marker
       end
 
       def _affiliate_marker?(marker)

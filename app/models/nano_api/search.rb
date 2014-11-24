@@ -19,6 +19,7 @@ module NanoApi
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
     attribute :internal, type: Boolean, default: false
+    attribute :bot, type: Boolean, default: false
     attribute :price
     attribute :locale
     attribute :test_name
@@ -35,7 +36,11 @@ module NanoApi
 
     def host
       result = LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
-      result && internal? ? "internal.#{result}" : result
+      if result
+        result = "internal.#{result}" if internal?
+        result = "bot.#{result}" if bot?
+      end
+      result
     end
 
     def locale

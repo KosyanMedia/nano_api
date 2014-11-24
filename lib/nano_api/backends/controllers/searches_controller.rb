@@ -72,7 +72,8 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
         merge(with_request: false).
         merge(slice_split_params || {}).
         merge(auid_params).
-        merge(platform_params)
+        merge(platform_params).
+        merge(bot: bot?)
     )
     cookies.permanent[@search.open_jaw ? :open_jaw_search_params : :search_params] = {
       value: @search.params.to_json,

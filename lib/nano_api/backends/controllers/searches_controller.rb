@@ -42,41 +42,13 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     else
       search_instance search_params
     end
-    render json: result.non_default_params
-  end
-
-  def slice_split_params
-    split_description = request.cookies.slice *%w(test_name test_rule)
-    split_description.values.any?(&:blank?) || Time.now.to_i > request.cookies['test_stop'].to_i ? nil : split_description
-  end
-
-  def slice_auid_params
-    request.cookies.slice(*%w(auid _ga))
-  end
-
-  def platform_params
-    os = Jetradar::UserAgentParser.parse(request.env['HTTP_USER_AGENT']).os
-    platform = {device: is_tablet_device? && 'tablet' || is_mobile_device? && 'mobile' || 'desktop'}
-    platform[:os] = os.name if os.name.present?
-    platform[:os_version] = os.version.to_s if os.version.present?
-    {platform: platform}
+    render json: result.non_default_display_params
   end
 
   def create
-    auid_params = slice_auid_params
-    unless auid_params["auid"].present?
-      auid_params["auid"] = fetch_auid
-    end
-    @search = NanoApi::Search.new(
-      search_params.
-        merge(with_request: false).
-        merge(slice_split_params || {}).
-        merge(auid_params).
-        merge(platform_params).
-        merge(bot: bot?)
-    )
+    @search = NanoApi::Search.new(search_params.merge(request_search_params))
     cookies.permanent[@search.open_jaw ? :open_jaw_search_params : :search_params] = {
-      value: @search.params.to_json,
+      value: @search.store_params.to_json,
       domain: default_nano_domain
     }
 
@@ -99,6 +71,50 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   end
 
 private
+
+  def slice_split_params
+    split_description = request.cookies.slice *%w(test_name test_rule)
+    split_description.values.any?(&:blank?) || Time.now.to_i > request.cookies['test_stop'].to_i ? nil : split_description
+  end
+
+  def slice_auid_params
+    request.cookies.slice(*%w(auid _ga))
+  end
+
+  def platform_params
+    os = user_agent_info.os
+    platform = {device: is_tablet_device? && 'tablet' || is_mobile_device? && 'mobile' || 'desktop'}
+    platform[:os] = os.name if os.name.present?
+    platform[:os_version] = os.version.to_s if os.version.present?
+    {platform: platform}
+  end
+
+  def request_search_params
+    auid_params = slice_auid_params
+    unless auid_params["auid"].present?
+      auid_params["auid"] = fetch_auid
+    end
+
+    user_ip = request.try(:remote_ip)
+
+    host = if user_ip &&
+      (country_host_override = CmsEngine::DomainConfig.current.country_host_override.try(:with_indifferent_access)) &&
+      (country_code = CmsEngine.geoip.try(:country, user_ip).try(:country_code2)) &&
+      (host_replacement = country_host_override[country_code])
+      host_replacement
+    else
+      request.try(:host_with_port)
+    end
+
+    {
+      bot: bot?,
+      host: host,
+      user_ip: user_ip,
+      marker: marker
+    }.merge(slice_split_params || {}).
+      merge(auid_params).
+      merge(platform_params)
+  end
 
   def search_engine_scope?
     true

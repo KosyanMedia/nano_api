@@ -15,6 +15,9 @@ module NanoApi
     LOCALES_TO_HOSTS = defined?(Settings) && Settings.hosts.respond_to?(:to_hash) ?
       Settings.hosts.to_hash.stringify_keys.invert.symbolize_keys : {}
 
+    STORE_PARAMS = [:trip_class, :open_jaw, :segments, :passengers]
+    DISPLAY_PARAMS = STORE_PARAMS + [:with_request, :price]
+
     attribute :trip_class, type: String, in: TRIP_CLASSES, default: 'Y'
     attribute :with_request, type: Boolean, default: false
     attribute :open_jaw, type: Boolean, default: false
@@ -24,8 +27,12 @@ module NanoApi
     attribute :locale
     attribute :test_name
     attribute :test_rule
-
-    attr_accessor :errors, :platform, :_ga, :auid
+    attribute :platform
+    attribute :_ga
+    attribute :auid
+    attribute :host
+    attribute :user_ip
+    attribute :marker
 
     embeds_many :segments, class: NanoApi::Segment
     embeds_one :passengers, class: NanoApi::Passengers
@@ -35,7 +42,7 @@ module NanoApi
     delegate(:adults, :children, :infants, :adults=, :children=, :infants=, to: :passengers)
 
     def host
-      result = LOCALES_TO_HOSTS[read_attribute(:locale).try(:to_sym) || I18n.locale]
+      result = super || LOCALES_TO_HOSTS[locale]
       if result
         result = "internal.#{result}" if internal?
         result = "bot.#{result}" if bot?
@@ -170,18 +177,20 @@ module NanoApi
       present_attributes.merge(
         segments: segments.map(&:params),
         passengers: passengers.present_attributes
-      )
+      ).with_indifferent_access
+    end
+
+    def display_params
+      params.slice(*DISPLAY_PARAMS)
+    end
+
+    def store_params
+      params.slice(*STORE_PARAMS)
     end
 
     def search_params
       result = params
-      result.merge!(
-        host: host,
-        locale: result[:locale].to_s.sub('-', '_'),
-        platform: platform,
-        auid: auid,
-        _ga: _ga
-      )
+      result[:locale] = result[:locale].to_s.sub('-', '_')
       result.delete(:open_jaw)
       result[:segments].each do |segment|
         [:origin, :destination].each do |place|
@@ -195,14 +204,8 @@ module NanoApi
       result
     end
 
-    def non_default_params
-      Hash[params.to_a - self.class.new.params.to_a]
-    end
-
-    def self.find id
-      attributes = NanoApi.client.search_params(id)
-      raise NotFound unless attributes
-      new(attributes)
+    def non_default_display_params
+      Hash[display_params.to_a - self.class.new.display_params.to_a]
     end
 
     def initialize_with_defaults attributes = {}
@@ -214,10 +217,22 @@ module NanoApi
       initialize_without_defaults(attributes)
     end
 
-    def self.open_jaw_new attributes = {}
-      search = new(segments: 2.times.map { NanoApi::Segment.new }, open_jaw: true)
-      search.update_attributes(attributes)
-      search
+    class << self
+      def find id
+        attributes = NanoApi.client.search_params(id)
+        raise NotFound unless attributes
+        new(attributes)
+      end
+
+      def open_jaw_new attributes = {}
+        search = new(segments: 2.times.map { NanoApi::Segment.new }, open_jaw: true)
+        search.update_attributes(attributes)
+        search
+      end
+
+      def default_display_params
+        new.display_params
+      end
     end
 
     alias_method_chain :initialize, :defaults

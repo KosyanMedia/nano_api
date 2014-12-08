@@ -48,7 +48,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
   def create
     @search = NanoApi::Search.new(search_params.merge(request_search_params))
     cookies.permanent[@search.open_jaw ? :open_jaw_search_params : :search_params] = {
-      value: @search.store_params.to_json,
+      value: MultiJson.dump(@search.store_params),
       domain: default_nano_domain
     }
 
@@ -57,7 +57,7 @@ class NanoApi::Backends::SearchesController < NanoApi::ApplicationController
     if search_result.present?
       if search_result.is_a?(String)
         if rates = JSON.parse(search_result)['currency_rates']
-          Rails.cache.write(NanoApi.config.rates_cache, rates.to_json)
+          Rails.cache.write(NanoApi.config.rates_cache, MultiJson.dump(rates))
         end
         search_id = get_search_id(search_result)
         auid = request.cookies['auid'].to_s.gsub(/\s/, '+')

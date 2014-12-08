@@ -95,7 +95,7 @@ module NanoApi
         path = [path, params.to_query].delete_if(&:blank?).join('?')
         site(options[:host])[path].send(method, headers)
       else
-        site(options[:host])[path].send(method, params.to_json, headers)
+        site(options[:host])[path].send(method, MultiJson.dump(params), headers)
       end
     end
   end

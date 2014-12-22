@@ -34,9 +34,7 @@ module NanoApi
         }
       end
 
-      def default_nano_domain
-        request.domain unless request.local?
-      end
+      def default_nano_domain; end
 
       def default_marker
         'direct'

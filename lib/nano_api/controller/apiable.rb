@@ -9,18 +9,6 @@ module NanoApi
         NanoApi.client = NanoApi::Client.new(self)
       end
 
-      def search_instance attributes = {}
-        search = NanoApi::Search.new(cookie_params)
-        search.update_attributes(attributes)
-        postprocess_search(search)
-      end
-
-      def open_jaw_search_instance attributes = {}
-        search = NanoApi::Search.open_jaw_new(open_jaw_cookie_params)
-        search.update_attributes(attributes)
-        postprocess_search(search)
-      end
-
       def postprocess_search(search)
         places = search.segments.flat_map { |segment| segment.params.values_at(:origin, :destination) }
         if places.any?(&:present?)

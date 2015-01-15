@@ -19,11 +19,6 @@ module NanoApi
         search
       end
 
-      # Doing no changes. Made for overriding.
-      def request_search_data(places)
-        places
-      end
-
       def cookie_params
         JSON.parse(cookies[:search_params].presence) rescue {}
       end

@@ -20,6 +20,7 @@ module NanoApi
     include NanoApi::Client::Overmind
     include NanoApi::Client::Affiliate
     include NanoApi::Client::WhiteLabel
+    include NanoApi::Client::Feedback
 
     attr_reader :controller
     delegate :request, :session, :marker, to: :controller, allow_nil: true

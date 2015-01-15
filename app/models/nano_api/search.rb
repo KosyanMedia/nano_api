@@ -72,6 +72,8 @@ module NanoApi
       end
     end
 
+    alias :oneway= :one_way=
+
     def one_way
       segments.count == 1 && !open_jaw
     end

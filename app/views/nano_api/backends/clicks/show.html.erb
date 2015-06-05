@@ -1,27 +1,36 @@
+<img id="pixel_booking_img" width="0" height="0"
+  src="http://yasen.aviasales.ru/adaptors/pixel_click.png?click_id=<%= @click_params[:click_id] %>&gate_id=<%= @click_params[:gate_id] %>">
+
 <% if 'get' == @click_params[:method] and @click_params[:params].blank? %>
   <script type="text/javascript">
-		var redirect = function(timeout, wrap_url){
-			setTimeout(function(){
-				window.location.href = wrap_url + '<%= raw @click_params[:url] %>';
-			}, timeout);
-		}
+    var redirect = function(timeout, wrap_url){
+      setTimeout(function(){
+        window.location.href = wrap_url + '<%= raw @click_params[:url] %>';
+      }, timeout);
+    }
   </script>
   <%= render 'counter' %>
 <% else %>
   <%= render 'form', form: @click_params %>
 
   <script type="text/javascript">
-		var redirect = function(timeout){
-			setTimeout(function(){
-				document.getElementById('nano_api_click_form').submit();
-			}, timeout);
-		}
+    var redirect = function(timeout){
+      setTimeout(function(){
+        document.getElementById('nano_api_click_form').submit();
+      }, timeout);
+    }
   </script>
 <% end %>
 
-<img width="0" height="0"
-  src="http://yasen.aviasales.ru/adaptors/pixel_click.png?click_id=<%= @click_params[:click_id] %>&gate_id=<%= @click_params[:gate_id] %>">
 
 <script type="text/javascript">
-	redirect(window.timeout || 0, window.wrapUrl || '');
+
+  pixel_booking_img = document.getElementById('pixel_booking_img');
+
+  pixel_booking_img.addEventListener('load', function() {
+
+    redirect(window.timeout || 0, window.wrapUrl || '');
+
+  }, false);
+
 </script>
